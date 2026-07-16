@@ -1,5 +1,6 @@
 using SimpleJRPG;
 using System.Collections.Generic;
+using TMPro; // <-- важно!
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,16 +12,16 @@ public class UIManager : MonoBehaviour
     public GameObject ActionPanel;
     public GameObject InventoryPanel;
     public GameObject SpellPanel;
-    public Text MessageText;
+    public TMP_Text MessageText; // заменено на TMP_Text
 
     [Header("Полосы здоровья и маны")]
     public Slider PlayerHealthSlider;
     public Slider EnemyHealthSlider;
-    public Text PlayerHealthText;
-    public Text EnemyHealthText;
+    public TMP_Text PlayerHealthText; // TMP_Text
+    public TMP_Text EnemyHealthText;  // TMP_Text
 
     public Slider PlayerManaSlider;
-    public Text PlayerManaText;
+    public TMP_Text PlayerManaText;   // TMP_Text
 
     [Header("Инвентарь и заклинания")]
     public Transform InventoryContent;
@@ -31,7 +32,7 @@ public class UIManager : MonoBehaviour
     // Ссылки на компоненты персонажей
     private HealthComponent _playerHealth;
     private HealthComponent _enemyHealth;
-    private StatsComponent _playerStats; // для маны
+    private StatsComponent _playerStats;
     private InventoryComponent _playerInventory;
     private SpellManagerComponent _playerSpells;
 
@@ -46,7 +47,7 @@ public class UIManager : MonoBehaviour
         ActionPanel.SetActive(false);
         InventoryPanel.SetActive(false);
         SpellPanel.SetActive(false);
-        MessageText.text = "";
+        if (MessageText != null) MessageText.text = "";
     }
 
     public void Initialize(
@@ -67,14 +68,10 @@ public class UIManager : MonoBehaviour
         PopulateInventoryUI();
         PopulateSpellUI();
 
-        // Подписка на события здоровья
         if (_playerHealth != null)
             _playerHealth.OnHealthChanged += (cur, max) => UpdateHealthUI();
         if (_enemyHealth != null)
             _enemyHealth.OnHealthChanged += (cur, max) => UpdateHealthUI();
-
-        // Подписка на изменение маны (если есть событие в StatsComponent)
-        // Если нет — обновляем вручную при каждом использовании.
     }
 
     void UpdateHealthUI()
@@ -82,18 +79,20 @@ public class UIManager : MonoBehaviour
         if (_playerHealth != null)
         {
             PlayerHealthSlider.value = (float)_playerHealth.CurrentHealth / _playerHealth.MaxHealth;
-            PlayerHealthText.text = $"{_playerHealth.CurrentHealth}/{_playerHealth.MaxHealth}";
+            if (PlayerHealthText != null)
+                PlayerHealthText.text = $"{_playerHealth.CurrentHealth}/{_playerHealth.MaxHealth}";
         }
         if (_enemyHealth != null)
         {
             EnemyHealthSlider.value = (float)_enemyHealth.CurrentHealth / _enemyHealth.MaxHealth;
-            EnemyHealthText.text = $"{_enemyHealth.CurrentHealth}/{_enemyHealth.MaxHealth}";
+            if (EnemyHealthText != null)
+                EnemyHealthText.text = $"{_enemyHealth.CurrentHealth}/{_enemyHealth.MaxHealth}";
         }
     }
 
     public void UpdateManaUI()
     {
-        if (_playerStats != null)
+        if (_playerStats != null && PlayerManaText != null)
         {
             PlayerManaSlider.value = (float)_playerStats.Mana / _playerStats.MaxMana;
             PlayerManaText.text = $"{_playerStats.Mana}/{_playerStats.MaxMana}";
@@ -102,19 +101,16 @@ public class UIManager : MonoBehaviour
 
     void PopulateInventoryUI()
     {
-        // Очищаем старые кнопки
         foreach (Transform child in InventoryContent) Destroy(child.gameObject);
         if (_playerInventory == null) return;
 
         foreach (var item in _playerInventory.Items)
         {
             var btn = Instantiate(ItemButtonPrefab, InventoryContent).GetComponent<Button>();
-            var btnText = btn.GetComponentInChildren<Text>();
-            btnText.text = $"{item.itemName}";
-
-            // Если есть иконка, можно её добавить
-            // var icon = btn.GetComponentInChildren<Image>();
-            // if (icon != null && item.icon != null) icon.sprite = item.icon;
+            // Получаем TMP_Text на кнопке (или в дочернем объекте)
+            var btnText = btn.GetComponentInChildren<TMP_Text>();
+            if (btnText != null)
+                btnText.text = item.itemName;
 
             btn.onClick.AddListener(() => BattleManager.Instance.PlayerUseItem(item));
         }
@@ -128,8 +124,9 @@ public class UIManager : MonoBehaviour
         foreach (var spell in _playerSpells.Spells)
         {
             var btn = Instantiate(SpellButtonPrefab, SpellContent).GetComponent<Button>();
-            var btnText = btn.GetComponentInChildren<Text>();
-            btnText.text = $"{spell.spellName} (MP: {spell.manaCost})";
+            var btnText = btn.GetComponentInChildren<TMP_Text>();
+            if (btnText != null)
+                btnText.text = $"{spell.spellName} (MP: {spell.manaCost})";
 
             btn.onClick.AddListener(() => BattleManager.Instance.PlayerCastSpell(spell));
         }
@@ -150,18 +147,20 @@ public class UIManager : MonoBehaviour
         if (SpellPanel.activeSelf) PopulateSpellUI();
     }
 
-    public void ShowMessage(string msg) => MessageText.text = msg;
+    public void ShowMessage(string msg)
+    {
+        if (MessageText != null) MessageText.text = msg;
+    }
 
     public void ShowBattleResult(BattleState state)
     {
         string result = state == BattleState.Victory ? "Победа!" : "Поражение...";
-        MessageText.text = result;
+        if (MessageText != null) MessageText.text = result;
         ActionPanel.SetActive(false);
         InventoryPanel.SetActive(false);
         SpellPanel.SetActive(false);
     }
 
-    // Метод для принудительного обновления всего UI (можно вызывать после хода)
     public void RefreshUI()
     {
         UpdateHealthUI();
