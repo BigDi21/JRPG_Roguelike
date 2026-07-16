@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 859eb001a7d9ea8479c88cad39fba093, type: 3}
   m_Name: DefenseMinus_3on2
   m_EditorClassIdentifier: Assembly-CSharp::DebuffEnemyEffect
-  targetType: 0
-  statName: 
-  penalty: 0
-  duration: 0
+  targetType: 1
+  statName: Defense
+  penalty: 3
+  duration: 2
