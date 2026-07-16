@@ -12,6 +12,10 @@ public class PlayerCombatant : BaseCombatant
         SpellManagerComponent = playerGO.GetComponent<SpellManagerComponent>();
     }
 
+    public int Mana => StatsComponent != null ? StatsComponent.Mana : 0;
+
+    public void UseMana(int amount) => StatsComponent?.UseMana(amount);
+
     public override void TakeDamage(int amount)
     {
         int finalDamage = Mathf.Max(1, amount - StatsComponent.Defense / 2);
