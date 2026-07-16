@@ -10,5 +10,6 @@ public enum DamageType
 {
     Physical,
     Magical,
-    True
+    True,
+    Acid
 }

@@ -9,7 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 879a3d7f47ae93e42a5c200f72a78fa2, type: 3}
-  m_Name: HealingEffect_30_HP
-  m_EditorClassIdentifier: Assembly-CSharp::HealEffect
-  HealAmount: 30
+  m_Script: {fileID: 11500000, guid: 949d22e6210ad1945ad738460d91d739, type: 3}
+  m_Name: StrengthPlus_5n3
+  m_EditorClassIdentifier: Assembly-CSharp::BuffSelfEffect
+  targetType: 0
+  statName: Strength
+  bonus: 5
+  duration: 3
