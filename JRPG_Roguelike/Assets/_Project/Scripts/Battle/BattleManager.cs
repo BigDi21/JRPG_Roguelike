@@ -35,35 +35,62 @@ public class BattleManager : MonoBehaviour
         _battle = new Battle();
         _battle.Start(_allies.Concat(_enemies).ToList(), _turnSystem);
 
+        // Подписка с правильными сигнатурами
         _battle.OnTurnStart += OnTurnStart;
         _battle.OnDamageDealt += OnDamageDealt;
         _battle.OnKO += OnKO;
-        _battle.OnBattleEnd += OnBattleEnd;
+        _battle.OnBattleEnd += OnBattleEnd; // теперь соответствует делегату
 
         IsBattleActive = true;
         _battle.BeginNextTurn();
     }
 
-    void OnTurnStart(Battle battle, ICombatant actor)
+    // ======== ОБРАБОТЧИКИ СОБЫТИЙ ========
+
+    void OnTurnStart(TurnEvent e)
     {
+        var actor = e.Actor;
         if (actor == _player)
         {
             UIManager.Instance.ShowActionPanel();
         }
         else
         {
-            // Ход врага — ИИ (всегда атака)
             var enemy = actor as EnemyCombatant;
             if (enemy != null && _player.IsAlive)
             {
                 int damage = enemy.StatsComponent.Strength + Random.Range(0, 5);
-                battle.DealDamage(enemy, _player, damage);
-                battle.EndTurn();
+                _battle.DealDamage(enemy, _player, damage);
+                _battle.EndTurn();
             }
         }
     }
 
+    void OnDamageDealt(DamageEvent e)
+    {
+        UIManager.Instance.ShowMessage($"{e.Source.Name} нанёс {e.Amount} урона {e.Target.Name}!");
+    }
+
+    void OnKO(KOEvent e)
+    {
+        UIManager.Instance.ShowMessage($"{e.Target.Name} повержен!");
+        if (!_player.IsAlive) _battle.EndBattle(BattleState.Defeat);
+        else if (!_enemy.IsAlive) _battle.EndBattle(BattleState.Victory);
+    }
+
+    void OnBattleEnd(Battle battle, BattleState state) // два параметра!
+    {
+        IsBattleActive = false;
+        UIManager.Instance.ShowBattleResult(state);
+
+        _battle.OnTurnStart -= OnTurnStart;
+        _battle.OnDamageDealt -= OnDamageDealt;
+        _battle.OnKO -= OnKO;
+        _battle.OnBattleEnd -= OnBattleEnd;
+    }
+
     // ======== ВСПОМОГАТЕЛЬНЫЙ МЕТОД ДЛЯ ВЫБОРА ЦЕЛИ ========
+
     private ICombatant GetTarget(Effect effect, ICombatant caster)
     {
         switch (effect.targetType)
@@ -88,6 +115,7 @@ public class BattleManager : MonoBehaviour
     }
 
     // ======== ДЕЙСТВИЯ ИГРОКА ========
+
     public void PlayerAttack()
     {
         if (!IsBattleActive) return;
@@ -99,11 +127,11 @@ public class BattleManager : MonoBehaviour
     public void PlayerDefend()
     {
         UIManager.Instance.ShowMessage("Герой защищается!");
-        // Здесь можно добавить временный бафф на защиту
         _battle.EndTurn();
     }
 
     // ======== ИСПОЛЬЗОВАНИЕ ПРЕДМЕТА ========
+
     public void PlayerUseItem(ItemData item)
     {
         if (!IsBattleActive) return;
@@ -141,12 +169,12 @@ public class BattleManager : MonoBehaviour
     }
 
     // ======== ИСПОЛЬЗОВАНИЕ ЗАКЛИНАНИЯ ========
+
     public void PlayerCastSpell(SpellData spell)
     {
         if (!IsBattleActive) return;
         if (!_player.SpellManagerComponent.Spells.Contains(spell)) return;
 
-        // Проверка маны (нужно добавить поле Mana в PlayerCombatant)
         if (_player.Mana < spell.manaCost)
         {
             UIManager.Instance.ShowMessage("Недостаточно маны!");
@@ -158,11 +186,9 @@ public class BattleManager : MonoBehaviour
         if (target != null)
         {
             spell.effect.Apply(_player, target);
-            _player.Mana -= spell.manaCost;
         }
         else
         {
-            // Массовые эффекты
             if (spell.effect.targetType == TargetType.All)
             {
                 foreach (var ally in _allies)
@@ -178,33 +204,9 @@ public class BattleManager : MonoBehaviour
                 Debug.LogWarning("Не удалось выбрать цель для заклинания!");
                 return;
             }
-            _player.Mana -= spell.manaCost;
         }
 
+        _player.UseMana(spell.manaCost);
         _battle.EndTurn();
-    }
-
-    // ======== ОБРАБОТЧИКИ СОБЫТИЙ ========
-    void OnDamageDealt(Battle battle, DamageEvent e)
-    {
-        UIManager.Instance.ShowMessage($"{e.Source.Name} нанёс {e.Amount} урона {e.Target.Name}!");
-    }
-
-    void OnKO(Battle battle, KOEvent e)
-    {
-        UIManager.Instance.ShowMessage($"{e.Target.Name} повержен!");
-        if (!_player.IsAlive) _battle.EndBattle(BattleState.Defeat);
-        else if (!_enemy.IsAlive) _battle.EndBattle(BattleState.Victory);
-    }
-
-    void OnBattleEnd(Battle battle, BattleState state)
-    {
-        IsBattleActive = false;
-        UIManager.Instance.ShowBattleResult(state);
-
-        _battle.OnTurnStart -= OnTurnStart;
-        _battle.OnDamageDealt -= OnDamageDealt;
-        _battle.OnKO -= OnKO;
-        _battle.OnBattleEnd -= OnBattleEnd;
     }
 }
