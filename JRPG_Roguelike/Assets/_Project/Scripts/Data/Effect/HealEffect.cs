@@ -2,7 +2,7 @@ using SimpleJRPG;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewHealEffect", menuName = "JRPG/Effects/Heal")]
-public class HealEffect : ItemEffect
+public class HealEffect : Effect
 {
     public int HealAmount;
 

@@ -9,7 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f66fb78d85274e4c9de0be355c73f64, type: 3}
-  m_Name: EffectDamage_15
-  m_EditorClassIdentifier: Assembly-CSharp::DamageEffect
-  DamageAmount: 0
+  m_Script: {fileID: 11500000, guid: 859eb001a7d9ea8479c88cad39fba093, type: 3}
+  m_Name: DefenseMinus_3on2
+  m_EditorClassIdentifier: Assembly-CSharp::DebuffEnemyEffect
+  targetType: 0
+  statName: 
+  penalty: 0
+  duration: 0
