@@ -132,7 +132,10 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void ShowActionPanel() => ActionPanel.SetActive(true);
+    public void ShowActionPanel()
+    {
+        ActionPanel.SetActive(true);
+    }
     public void HideActionPanel() => ActionPanel.SetActive(false);
 
     public void ShowInventory()
