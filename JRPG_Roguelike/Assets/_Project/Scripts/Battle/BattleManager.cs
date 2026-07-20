@@ -1,14 +1,18 @@
 using SimpleJRPG;
 using System.Collections.Generic;
+//using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 
 public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance { get; private set; }
+    public GameObject playerGO;
+    public GameObject enemyGO;
 
     private Battle _battle;
-    private ATBTurnSystem _turnSystem;
+    //private ATBTurnSystem _turnSystem;
+    private ClassicTurnSystem _turnSystem;
     private List<ICombatant> _allies = new();
     private List<ICombatant> _enemies = new();
 
@@ -19,8 +23,29 @@ public class BattleManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    void Start()
+    {
+        // Находим игрока и врага на сцене (по имени или по тегу)
+        //GameObject playerGO = GameObject.Find("Player");
+        //GameObject enemyGO = GameObject.Find("Enemy");
+
+        if (playerGO == null || enemyGO == null)
+        {
+            Debug.LogError("Не найдены объекты Player или Enemy на сцене!");
+            return;
+        }
+
+        StartBattle(playerGO, enemyGO);
     }
 
     public void StartBattle(GameObject playerGO, GameObject enemyGO)
@@ -28,10 +53,17 @@ public class BattleManager : MonoBehaviour
         _player = new PlayerCombatant(playerGO, "Герой", 0);
         _enemy = new EnemyCombatant(enemyGO, "Гоблин", 1);
 
+        UIManager.Instance.Initialize(_player.HealthComponent,
+                                      _enemy.HealthComponent,
+                                      _player.StatsComponent,
+                                      _player.InventoryComponent,
+                                      _player.SpellManagerComponent);
+
         _allies.Add(_player);
         _enemies.Add(_enemy);
 
-        _turnSystem = new ATBTurnSystem();
+        //_turnSystem = new ATBTurnSystem();
+        _turnSystem = new ClassicTurnSystem();
         _battle = new Battle();
         _battle.Start(_allies.Concat(_enemies).ToList(), _turnSystem);
 
@@ -52,6 +84,7 @@ public class BattleManager : MonoBehaviour
         var actor = e.Actor;
         if (actor == _player)
         {
+            if (UIManager.Instance == null) Debug.LogError("UIManager.Instance == null!");
             UIManager.Instance.ShowActionPanel();
         }
         else
@@ -122,12 +155,24 @@ public class BattleManager : MonoBehaviour
         int damage = _player.StatsComponent.Strength + Random.Range(0, 5);
         _battle.DealDamage(_player, _enemy, damage);
         _battle.EndTurn();
+
+        if (_battle.State == BattleState.WaitingForCommands)
+        {
+            Debug.Log("Запускаем следующий ход (атака)");
+            _battle.BeginNextTurn();
+        }
     }
 
     public void PlayerDefend()
     {
         UIManager.Instance.ShowMessage("Герой защищается!");
         _battle.EndTurn();
+
+        if (_battle.State == BattleState.WaitingForCommands)
+        {
+            Debug.Log("Запускаем следующий ход (защита)");
+            _battle.BeginNextTurn();
+        }
     }
 
     // ======== ИСПОЛЬЗОВАНИЕ ПРЕДМЕТА ========
@@ -166,6 +211,11 @@ public class BattleManager : MonoBehaviour
         }
 
         _battle.EndTurn();
+        if (_battle.State == BattleState.WaitingForCommands)
+        {
+            Debug.Log("Запускаем следующий ход (предмет)");
+            _battle.BeginNextTurn();
+        }
     }
 
     // ======== ИСПОЛЬЗОВАНИЕ ЗАКЛИНАНИЯ ========
@@ -208,5 +258,10 @@ public class BattleManager : MonoBehaviour
 
         _player.UseMana(spell.manaCost);
         _battle.EndTurn();
+        if (_battle.State == BattleState.WaitingForCommands)
+        {
+            Debug.Log("Запускаем следующий ход (заклинание)");
+            _battle.BeginNextTurn();
+        }
     }
 }
