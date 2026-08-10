@@ -162,7 +162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b103e6b72667fe440994883e4dd09635, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CellVisual
-  floor: {fileID: 40011282422834094}
+  floorRenderer: {fileID: 4920301893714272799}
   northWall: {fileID: 8115376812867336757}
   eastWall: {fileID: 4140985646677956822}
   southWall: {fileID: 1959869212574312575}

@@ -3,7 +3,7 @@ using UnityEngine;
 public class CellVisual : MonoBehaviour
 {
     [Header("Пол и стены")]
-    public GameObject floor;           // пол (можно использовать корневой объект или отдельный)
+    public Renderer floorRenderer; // теперь Renderer, а не SpriteRenderer
     public GameObject northWall;
     public GameObject eastWall;
     public GameObject southWall;
@@ -35,9 +35,9 @@ public class CellVisual : MonoBehaviour
 
         // 1. Обновляем пол (цвет, если занято)
         if (Data.IsOccupied)
-            floor.GetComponent<SpriteRenderer>().color = occupiedFloorColor;
+            floorRenderer.material.color = occupiedFloorColor;
         else
-            floor.GetComponent<SpriteRenderer>().color = defaultFloorColor;
+            floorRenderer.material.color = defaultFloorColor;
 
         // 2. Обновляем стены: отключаем ту, где есть соединение
         northWall.SetActive(!Data.CanMove(Directions.North));
@@ -69,6 +69,5 @@ public class CellVisual : MonoBehaviour
     private void OnMouseDown()
     {
         Debug.Log($"Clicked on cell {Data.Position}");
-        // Можно вызвать событие для системы перемещения
     }
 }
