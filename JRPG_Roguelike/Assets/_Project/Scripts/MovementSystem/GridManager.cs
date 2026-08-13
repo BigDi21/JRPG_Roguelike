@@ -27,12 +27,12 @@ public class GridManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+        GenerateGrid(Width, Height);
+        PlaceStartAndFinish();
     }
 
     void Start()
     {
-        GenerateGrid(Width, Height);
-        PlaceStartAndFinish();
         CreateVisuals();
     }
 
@@ -211,4 +211,11 @@ public class GridManager : MonoBehaviour
     }
 
     public Cell GetCell(int x, int y) => GetCell(new Vector2Int(x, y));
+
+    public Vector3 GetWorldPosition(Vector2Int gridPos)
+    {
+        float offsetX = (Width - 1) * cellSize * 0.5f;
+        float offsetZ = (Height - 1) * cellSize * 0.5f;
+        return new Vector3(gridPos.x * cellSize - offsetX, 0, gridPos.y * cellSize - offsetZ);
+    }
 }
