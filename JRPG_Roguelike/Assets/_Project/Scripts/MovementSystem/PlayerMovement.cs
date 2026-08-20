@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Настройки анимации")]
     public float moveDuration = 0.2f;    // время перемещения между ячейками
     public float rotateDuration = 0.15f; // время поворота на 90°
+    public bool IsMoving { get; private set; }
 
     private Vector2Int _currentGridPos;
     private Directions _facingDirection = Directions.North;
@@ -140,6 +141,7 @@ public class PlayerMovement : MonoBehaviour
     private IEnumerator MoveSmoothly(Vector3 startPos, Vector3 endPos)
     {
         _isAnimating = true;
+        IsMoving = true; // движение началось
         float elapsed = 0f;
 
         while (elapsed < moveDuration)
@@ -151,6 +153,7 @@ public class PlayerMovement : MonoBehaviour
         }
         transform.position = endPos;
         _isAnimating = false;
+        IsMoving = false; // движение закончилось
     }
 
     private Directions RelativeToAbsolute(Directions relative)
