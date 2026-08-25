@@ -162,8 +162,8 @@ public class GridManager : MonoBehaviour
 
     private void PlaceStartAndFinish()
     {
-        StartPosition = new Vector2Int(0, 0);
-        FinishPosition = new Vector2Int(Width - 1, Height - 1);
+        StartPosition = new Vector2Int(Width - 1, 0);
+        FinishPosition = new Vector2Int(0, Height - 1);
     }
 
     // ======== ¬»«”јЋ»«ј÷»я (исправленное размещение) ========
@@ -217,5 +217,50 @@ public class GridManager : MonoBehaviour
         float offsetX = (Width - 1) * cellSize * 0.5f;
         float offsetZ = (Height - 1) * cellSize * 0.5f;
         return new Vector3(gridPos.x * cellSize - offsetX, 0, gridPos.y * cellSize - offsetZ);
+    }
+
+    public void RevealArea(Vector2Int start, Directions direction, int range = 3)
+    {
+        Vector2Int current = start;
+        // ќткрываем стартовую €чейку
+        GetCell(current)?.Discover();
+
+        for (int i = 0; i < range; i++)
+        {
+            Vector2Int next = current + GetOffset(direction);
+            if (!IsInBounds(next)) break;
+
+            Cell nextCell = GetCell(next);
+            if (nextCell == null) break;
+
+            // ≈сли есть стена между текущей и следующей Ч останавливаемс€
+            if (!GetCell(current).CanMove(direction)) break;
+
+            nextCell.Discover();
+            current = next;
+        }
+    }
+
+    private Vector2Int GetOffset(Directions dir)
+    {
+        switch (dir)
+        {
+            case Directions.North: return Vector2Int.up;
+            case Directions.South: return Vector2Int.down;
+            case Directions.East: return Vector2Int.right;
+            case Directions.West: return Vector2Int.left;
+            default: return Vector2Int.zero;
+        }
+    }
+
+    public IEnumerable<Cell> GetAllCells()
+    {
+        for (int x = 0; x < Width; x++)
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                yield return Grid[x, y];
+            }
+        }
     }
 }

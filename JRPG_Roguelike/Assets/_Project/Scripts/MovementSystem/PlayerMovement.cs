@@ -5,7 +5,6 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("—сылки")]
     public GridManager gridManager;
-    public Vector2Int startGridPosition = new Vector2Int(0, 0);
 
     [Header("Ќастройки анимации")]
     public float moveDuration = 0.2f;    // врем€ перемещени€ между €чейками
@@ -24,22 +23,12 @@ public class PlayerMovement : MonoBehaviour
         if (gridManager == null)
             gridManager = GridManager.Instance;
 
-        if (gridManager == null)
-        {
-            Debug.LogError("GridManager не найден!");
-            return;
-        }
-
-        _currentGridPos = startGridPosition;
+        _currentGridPos = gridManager.StartPosition;
         _currentCell = gridManager.GetCell(_currentGridPos);
         if (_currentCell != null)
         {
             _currentCell.SetOccupant(gameObject);
             transform.position = gridManager.GetWorldPosition(_currentGridPos);
-        }
-        else
-        {
-            Debug.LogError($"ячейка {startGridPosition} не найдена!");
         }
     }
 
@@ -136,6 +125,9 @@ public class PlayerMovement : MonoBehaviour
         Vector3 startPos = transform.position;
         Vector3 endPos = gridManager.GetWorldPosition(_currentGridPos);
         StartCoroutine(MoveSmoothly(startPos, endPos));
+
+        if (MapManager.Instance != null)
+            MapManager.Instance.UpdateMap(_currentGridPos, _facingDirection);
     }
 
     private IEnumerator MoveSmoothly(Vector3 startPos, Vector3 endPos)

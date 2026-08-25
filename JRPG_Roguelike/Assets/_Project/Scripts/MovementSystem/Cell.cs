@@ -18,6 +18,10 @@ public class Cell
     public GameObject Occupant { get; private set; }
 
     public event Action<Cell> OnDataChanged;
+    public bool IsDiscovered { get; private set; } = false;
+    public bool CanMove(Directions direction) => (Connections & direction) != 0;
+    public void AddConnection(Directions direction) => Connections |= direction;
+    public void RemoveConnection(Directions direction) => Connections &= ~direction;
 
     public Cell(Vector2Int position)
     {
@@ -25,10 +29,6 @@ public class Cell
         Connections = Directions.None;
         Occupant = null;
     }
-
-    public bool CanMove(Directions direction) => (Connections & direction) != 0;
-    public void AddConnection(Directions direction) => Connections |= direction;
-    public void RemoveConnection(Directions direction) => Connections &= ~direction;
 
     public void SetOccupant(GameObject obj)
     {
@@ -46,4 +46,11 @@ public class Cell
 
     public bool IsOccupied => Occupant != null;
     private void NotifyChanged() => OnDataChanged?.Invoke(this);
+
+    public void Discover()
+    {
+        if (IsDiscovered) return;
+        IsDiscovered = true;
+        OnDataChanged?.Invoke(this);
+    }
 }
