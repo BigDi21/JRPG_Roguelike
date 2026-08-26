@@ -21,6 +21,9 @@ public class MapManager : MonoBehaviour
     private Dictionary<Vector2Int, MapTile> _tiles = new();
     private Vector2Int _playerPosition;
 
+    public GameObject playerMarkerPrefab; // префаб маркера (переименуйте в инспекторе)
+    private GameObject _playerMarkerInstance; // экземпляр на сцене
+
     void Awake()
     {
         if (Instance == null) Instance = this;
@@ -68,12 +71,19 @@ public class MapManager : MonoBehaviour
         // Центрируем карту на игроке (для большой карты и миникарты)
         Vector3 targetPos = new Vector3(-playerPos.x * tileSize, -playerPos.y * tileSize, 0);
         bigMapContainer.localPosition = targetPos;
-        if (miniMapMask != null)
+        // Обновляем маркер игрока
+        UpdatePlayerMarker(playerPos);
+
+        float angle = 0f;
+        float shift = 180f;
+        switch (facingDir)
         {
-            // Если миникарта использует ту же карту, но с маской, обновляем позицию контента
-            // Т.к. bigMapContainer — это контент, а miniMapMask — маска, то bigMapContainer должен быть дочерним miniMapMask
-            // и мы уже обновили его позицию. Миникарта покажет фрагмент.
+            case Directions.North: angle = 0f + shift; break;
+            case Directions.East: angle = -90f + shift; break;
+            case Directions.South: angle = 180f + shift; break;
+            case Directions.West: angle = 90f + shift; break;
         }
+        _playerMarkerInstance.transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
     // Переключение тумана войны
@@ -98,5 +108,39 @@ public class MapManager : MonoBehaviour
             if (cell != null)
                 kvp.Value.Initialize(cell, fogOfWarEnabled);
         }
+    }
+
+    public void UpdatePlayerMarker(Vector2Int playerPos)
+    {
+        // Если экземпляр ещё не создан — создаём
+        if (_playerMarkerInstance == null)
+        {
+            if (playerMarkerPrefab == null)
+            {
+                Debug.LogWarning("playerMarkerPrefab не назначен!");
+                return;
+            }
+            if (bigMapContainer == null)
+            {
+                Debug.LogError("bigMapContainer не назначен!");
+                return;
+            }
+            _playerMarkerInstance = Instantiate(playerMarkerPrefab, bigMapContainer);
+            // Можно задать размер маркера, если нужно
+            // _playerMarkerInstance.transform.localScale = Vector3.one * 0.5f;
+        }
+
+        // Обновляем позицию маркера
+        _playerMarkerInstance.transform.localPosition = new Vector3(
+            playerPos.x * tileSize,
+            playerPos.y * tileSize,
+            0
+        );
+
+        _playerMarkerInstance.transform.SetAsLastSibling();
+
+        // Убедимся, что маркер активен
+        if (!_playerMarkerInstance.activeSelf)
+            _playerMarkerInstance.SetActive(true);
     }
 }

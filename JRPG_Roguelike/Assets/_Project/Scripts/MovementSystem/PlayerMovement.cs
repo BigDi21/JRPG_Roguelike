@@ -30,6 +30,9 @@ public class PlayerMovement : MonoBehaviour
             _currentCell.SetOccupant(gameObject);
             transform.position = gridManager.GetWorldPosition(_currentGridPos);
         }
+
+        if (MapManager.Instance != null)
+            MapManager.Instance.UpdateMap(_currentGridPos, _facingDirection);
     }
 
     void Update()
@@ -37,6 +40,12 @@ public class PlayerMovement : MonoBehaviour
         if (_isAnimating) return; // блокируем ввод во время анимации
 
         HandleInput();
+
+        if (Input.GetKeyDown(KeyCode.J))
+        {
+            MapManager.Instance.ToggleFog();
+        }
+
     }
 
     private void HandleInput()
@@ -67,6 +76,8 @@ public class PlayerMovement : MonoBehaviour
 
         float targetAngle = newIndex * 90f;
         StartCoroutine(RotateSmoothly(targetAngle));
+        if (MapManager.Instance != null)
+            MapManager.Instance.UpdateMap(_currentGridPos, _facingDirection);
     }
 
     private IEnumerator RotateSmoothly(float targetAngle)
