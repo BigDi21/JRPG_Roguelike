@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8729809466455476196
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5547269393730807899}
+  - component: {fileID: 4271858666473166008}
+  - component: {fileID: 8919298498228003817}
+  m_Layer: 0
+  m_Name: GridManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5547269393730807899
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8729809466455476196}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.46895, y: -0, z: -2.22129}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4271858666473166008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8729809466455476196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1123f9f54b221174a8b4ab83005eb8a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GridManager
+  Width: 20
+  Height: 20
+  cellSize: 10
+  cellPrefab: {fileID: 848303480885075875, guid: 6be158df36b9b1a48b73760088033431, type: 3}
+  startMarker: {fileID: 10136497813677265, guid: a720107d729ae8c4ea576a1971c41e44, type: 3}
+  finishMarker: {fileID: 1628907840296366201, guid: 8c02e04a5da69cd4fbea4d2af08cae28, type: 3}
+--- !u!114 &8919298498228003817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8729809466455476196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ee3b00711ae29c44bd75ae9a2f71b88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MapManager
+  bigMapContainer: {fileID: 0}
+  bigMapFullContainer: {fileID: 0}
+  mapTilePrefab: {fileID: 6210981026958878972, guid: e1b0c70a9e685204b9f6a366d1f97f18, type: 3}
+  playerMarkerPrefab: {fileID: 3886443187017364979, guid: 7c29e8c287af85a4a921ea33e5fa03d8, type: 3}
+  tileSize: 20
+  fogOfWarEnabled: 1
+  panSpeed: 200
+  mouseSensitivity: 100
+  bigMapPanel: {fileID: 0}
