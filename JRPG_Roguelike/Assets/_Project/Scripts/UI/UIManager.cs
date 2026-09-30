@@ -1,55 +1,69 @@
-using SimpleJRPG;
 using System.Collections.Generic;
-using TMPro; // <-- важно!
+using SimpleJRPG;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Управляет боевым UI: панелями действий, инвентарём, заклинаниями, полосами HP/маны и сообщениями.
+/// </summary>
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
 
     [Header("Панели")]
-    public GameObject ActionPanel;
-    public GameObject InventoryPanel;
-    public GameObject SpellPanel;
-    public TMP_Text MessageText; // заменено на TMP_Text
+    [SerializeField] private GameObject _actionPanel;
+    [SerializeField] private GameObject _inventoryPanel;
+    [SerializeField] private GameObject _spellPanel;
+    [SerializeField] private TMP_Text _messageText;
 
-    [Header("Полосы здоровья и маны")]
-    public Slider PlayerHealthSlider;
-    public Slider EnemyHealthSlider;
-    public TMP_Text PlayerHealthText; // TMP_Text
-    public TMP_Text EnemyHealthText;  // TMP_Text
+    [Header("Полосы здоровья")]
+    [SerializeField] private Slider _playerHealthSlider;
+    [SerializeField] private Slider _enemyHealthSlider;
+    [SerializeField] private TMP_Text _playerHealthText;
+    [SerializeField] private TMP_Text _enemyHealthText;
 
-    public Slider PlayerManaSlider;
-    public TMP_Text PlayerManaText;   // TMP_Text
+    [Header("Полоса маны")]
+    [SerializeField] private Slider _playerManaSlider;
+    [SerializeField] private TMP_Text _playerManaText;
 
     [Header("Инвентарь и заклинания")]
-    public Transform InventoryContent;
-    public Transform SpellContent;
-    public GameObject ItemButtonPrefab;
-    public GameObject SpellButtonPrefab;
+    [SerializeField] private Transform _inventoryContent;
+    [SerializeField] private Transform _spellContent;
+    [SerializeField] private GameObject _itemButtonPrefab;
+    [SerializeField] private GameObject _spellButtonPrefab;
 
-    // Ссылки на компоненты персонажей
     private HealthComponent _playerHealth;
     private HealthComponent _enemyHealth;
     private StatsComponent _playerStats;
     private InventoryComponent _playerInventory;
     private SpellManagerComponent _playerSpells;
 
-    void Awake()
+    private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
-    void Start()
+    private void Start()
     {
-        ActionPanel.SetActive(false);
-        InventoryPanel.SetActive(false);
-        SpellPanel.SetActive(false);
-        if (MessageText != null) MessageText.text = "";
+        SetPanelsActive(false, false, false);
+
+        if (_messageText != null)
+            _messageText.text = string.Empty;
     }
 
+    // ======== ИНИЦИАЛИЗАЦИЯ ========
+
+    /// <summary>
+    /// Привязывает UI к компонентам игрока и врага.
+    /// </summary>
     public void Initialize(
         HealthComponent playerHealth,
         HealthComponent enemyHealth,
@@ -68,107 +82,231 @@ public class UIManager : MonoBehaviour
         PopulateInventoryUI();
         PopulateSpellUI();
 
-        if (_playerHealth != null)
-            _playerHealth.OnHealthChanged += (cur, max) => UpdateHealthUI();
-        if (_enemyHealth != null)
-            _enemyHealth.OnHealthChanged += (cur, max) => UpdateHealthUI();
+        SubscribeToHealthEvents();
     }
 
-    void UpdateHealthUI()
+    private void SubscribeToHealthEvents()
     {
         if (_playerHealth != null)
-        {
-            PlayerHealthSlider.value = (float)_playerHealth.CurrentHealth / _playerHealth.MaxHealth;
-            if (PlayerHealthText != null)
-                PlayerHealthText.text = $"{_playerHealth.CurrentHealth}/{_playerHealth.MaxHealth}";
-        }
+            _playerHealth.OnHealthChanged += OnHealthChanged;
+
         if (_enemyHealth != null)
-        {
-            EnemyHealthSlider.value = (float)_enemyHealth.CurrentHealth / _enemyHealth.MaxHealth;
-            if (EnemyHealthText != null)
-                EnemyHealthText.text = $"{_enemyHealth.CurrentHealth}/{_enemyHealth.MaxHealth}";
-        }
+            _enemyHealth.OnHealthChanged += OnHealthChanged;
     }
 
+    private void UnsubscribeFromHealthEvents()
+    {
+        if (_playerHealth != null)
+            _playerHealth.OnHealthChanged -= OnHealthChanged;
+
+        if (_enemyHealth != null)
+            _enemyHealth.OnHealthChanged -= OnHealthChanged;
+    }
+
+    private void OnDestroy()
+    {
+        UnsubscribeFromHealthEvents();
+
+        if (Instance == this)
+            Instance = null;
+    }
+
+    private void OnHealthChanged(int current, int max)
+    {
+        UpdateHealthUI();
+    }
+
+    // ======== ОБНОВЛЕНИЕ UI ========
+
+    /// <summary>
+    /// Обновляет полосы и тексты здоровья игрока и врага.
+    /// </summary>
+    public void UpdateHealthUI()
+    {
+        UpdatePlayerHealthUI();
+        UpdateEnemyHealthUI();
+    }
+
+    private void UpdatePlayerHealthUI()
+    {
+        if (_playerHealth == null) return;
+
+        if (_playerHealthSlider != null)
+            _playerHealthSlider.value = (float)_playerHealth.CurrentHealth / _playerHealth.MaxHealth;
+
+        if (_playerHealthText != null)
+            _playerHealthText.text = $"{_playerHealth.CurrentHealth}/{_playerHealth.MaxHealth}";
+    }
+
+    private void UpdateEnemyHealthUI()
+    {
+        if (_enemyHealth == null) return;
+
+        if (_enemyHealthSlider != null)
+            _enemyHealthSlider.value = (float)_enemyHealth.CurrentHealth / _enemyHealth.MaxHealth;
+
+        if (_enemyHealthText != null)
+            _enemyHealthText.text = $"{_enemyHealth.CurrentHealth}/{_enemyHealth.MaxHealth}";
+    }
+
+    /// <summary>
+    /// Обновляет полосу и текст маны игрока.
+    /// </summary>
     public void UpdateManaUI()
     {
-        if (_playerStats != null && PlayerManaText != null)
-        {
-            PlayerManaSlider.value = (float)_playerStats.Mana / _playerStats.MaxMana;
-            PlayerManaText.text = $"{_playerStats.Mana}/{_playerStats.MaxMana}";
-        }
+        if (_playerStats == null) return;
+
+        if (_playerManaSlider != null)
+            _playerManaSlider.value = (float)_playerStats.Mana / _playerStats.MaxMana;
+
+        if (_playerManaText != null)
+            _playerManaText.text = $"{_playerStats.Mana}/{_playerStats.MaxMana}";
     }
 
-    void PopulateInventoryUI()
+    // ======== НАПОЛНЕНИЕ СПИСКОВ ========
+
+    private void PopulateInventoryUI()
     {
-        foreach (Transform child in InventoryContent) Destroy(child.gameObject);
-        if (_playerInventory == null) return;
+        ClearChildren(_inventoryContent);
+
+        if (_playerInventory == null || _itemButtonPrefab == null || _inventoryContent == null)
+            return;
 
         foreach (var item in _playerInventory.Items)
         {
-            var btn = Instantiate(ItemButtonPrefab, InventoryContent).GetComponent<Button>();
-            // Получаем TMP_Text на кнопке (или в дочернем объекте)
-            var btnText = btn.GetComponentInChildren<TMP_Text>();
-            if (btnText != null)
-                btnText.text = item.itemName;
-
-            btn.onClick.AddListener(() => BattleManager.Instance.PlayerUseItem(item));
+            var button = CreateButton(_itemButtonPrefab, _inventoryContent);
+            SetButtonText(button, item.ItemName);
+            button.onClick.AddListener(() => BattleManager.Instance.PlayerUseItem(item));
         }
     }
 
-    void PopulateSpellUI()
+    private void PopulateSpellUI()
     {
-        foreach (Transform child in SpellContent) Destroy(child.gameObject);
-        if (_playerSpells == null) return;
+        ClearChildren(_spellContent);
+
+        if (_playerSpells == null || _spellButtonPrefab == null || _spellContent == null)
+            return;
 
         foreach (var spell in _playerSpells.Spells)
         {
-            var btn = Instantiate(SpellButtonPrefab, SpellContent).GetComponent<Button>();
-            var btnText = btn.GetComponentInChildren<TMP_Text>();
-            if (btnText != null)
-                btnText.text = $"{spell.spellName} (MP: {spell.manaCost})";
-
-            btn.onClick.AddListener(() => BattleManager.Instance.PlayerCastSpell(spell));
+            var button = CreateButton(_spellButtonPrefab, _spellContent);
+            SetButtonText(button, $"{spell.SpellName} (MP: {spell.ManaCost})");
+            button.onClick.AddListener(() => BattleManager.Instance.PlayerCastSpell(spell));
         }
     }
 
+    private static Button CreateButton(GameObject prefab, Transform parent)
+    {
+        return Instantiate(prefab, parent).GetComponent<Button>();
+    }
+
+    private static void SetButtonText(Button button, string text)
+    {
+        var label = button.GetComponentInChildren<TMP_Text>();
+        if (label != null)
+            label.text = text;
+    }
+
+    private static void ClearChildren(Transform parent)
+    {
+        if (parent == null) return;
+
+        foreach (Transform child in parent)
+            Destroy(child.gameObject);
+    }
+
+    // ======== ПАНЕЛИ ========
+
+    /// <summary>
+    /// Показывает панель действий игрока.
+    /// </summary>
     public void ShowActionPanel()
     {
-        ActionPanel.SetActive(true);
+        if (_actionPanel != null)
+            _actionPanel.SetActive(true);
     }
-    public void HideActionPanel() => ActionPanel.SetActive(false);
 
+    /// <summary>
+    /// Скрывает панель действий игрока.
+    /// </summary>
+    public void HideActionPanel()
+    {
+        if (_actionPanel != null)
+            _actionPanel.SetActive(false);
+    }
+
+    /// <summary>
+    /// Переключает видимость панели инвентаря.
+    /// </summary>
     public void ShowInventory()
     {
-        InventoryPanel.SetActive(!InventoryPanel.activeSelf);
-        if (InventoryPanel.activeSelf) PopulateInventoryUI();
+        if (_inventoryPanel == null) return;
+
+        _inventoryPanel.SetActive(!_inventoryPanel.activeSelf);
+
+        if (_inventoryPanel.activeSelf)
+            PopulateInventoryUI();
     }
 
+    /// <summary>
+    /// Переключает видимость панели заклинаний.
+    /// </summary>
     public void ShowSpells()
     {
-        SpellPanel.SetActive(!SpellPanel.activeSelf);
-        if (SpellPanel.activeSelf) PopulateSpellUI();
+        if (_spellPanel == null) return;
+
+        _spellPanel.SetActive(!_spellPanel.activeSelf);
+
+        if (_spellPanel.activeSelf)
+            PopulateSpellUI();
     }
 
-    public void ShowMessage(string msg)
+    // ======== СООБЩЕНИЯ ========
+
+    /// <summary>
+    /// Показывает текстовое сообщение в UI.
+    /// </summary>
+    public void ShowMessage(string message)
     {
-        if (MessageText != null) MessageText.text = msg;
+        if (_messageText != null)
+            _messageText.text = message;
     }
 
+    /// <summary>
+    /// Показывает результат боя и скрывает все панели действий.
+    /// </summary>
     public void ShowBattleResult(BattleState state)
     {
         string result = state == BattleState.Victory ? "Победа!" : "Поражение...";
-        if (MessageText != null) MessageText.text = result;
-        ActionPanel.SetActive(false);
-        InventoryPanel.SetActive(false);
-        SpellPanel.SetActive(false);
+
+        if (_messageText != null)
+            _messageText.text = result;
+
+        SetPanelsActive(false, false, false);
     }
 
+    /// <summary>
+    /// Обновляет все элементы UI (HP, мана, инвентарь, заклинания).
+    /// </summary>
     public void RefreshUI()
     {
         UpdateHealthUI();
         UpdateManaUI();
         PopulateInventoryUI();
         PopulateSpellUI();
+    }
+
+    // ======== ВСПОМОГАТЕЛЬНЫЕ ========
+
+    private void SetPanelsActive(bool action, bool inventory, bool spells)
+    {
+        if (_actionPanel != null)
+            _actionPanel.SetActive(action);
+
+        if (_inventoryPanel != null)
+            _inventoryPanel.SetActive(inventory);
+
+        if (_spellPanel != null)
+            _spellPanel.SetActive(spells);
     }
 }

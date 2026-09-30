@@ -1,27 +1,48 @@
 using UnityEngine;
 
+/// <summary>
+/// Визуальное представление клетки. Отображает пол, стены и иконку объекта.
+/// </summary>
 public class CellVisual : MonoBehaviour
 {
     [Header("Пол и стены")]
-    public Renderer floorRenderer; // теперь Renderer, а не SpriteRenderer
-    public GameObject northWall;
-    public GameObject eastWall;
-    public GameObject southWall;
-    public GameObject westWall;
+    [SerializeField] private Renderer _floorRenderer;
+    [SerializeField] private GameObject _northWall;
+    [SerializeField] private GameObject _eastWall;
+    [SerializeField] private GameObject _southWall;
+    [SerializeField] private GameObject _westWall;
 
-    [Header("Иконка объекта (опционально)")]
-    public SpriteRenderer occupantIcon;
+    [Header("Иконка объекта")]
+    [SerializeField] private SpriteRenderer _occupantIcon;
 
+    [Header("Цвета пола")]
+    [SerializeField] private Color _defaultFloorColor = Color.white;
+    [SerializeField] private Color _occupiedFloorColor = Color.red;
+
+    /// <summary>Данные клетки, к которой привязан визуал.</summary>
     public Cell Data { get; private set; }
 
-    public Color defaultFloorColor = Color.white;
-    public Color occupiedFloorColor = Color.red;
-
+    /// <summary>
+    /// Инициализирует визуал данными клетки и подписывается на изменения.
+    /// </summary>
+    /// <param name="cellData">Данные клетки.</param>
     public void Initialize(Cell cellData)
     {
+        if (cellData == null)
+        {
+            Debug.LogError("[CellVisual] Передан null вместо данных клетки!");
+            return;
+        }
+
         Data = cellData;
         Data.OnDataChanged += OnCellDataChanged;
         UpdateVisual();
+    }
+
+    private void OnDestroy()
+    {
+        if (Data != null)
+            Data.OnDataChanged -= OnCellDataChanged;
     }
 
     private void OnCellDataChanged(Cell cell)
@@ -33,41 +54,69 @@ public class CellVisual : MonoBehaviour
     {
         if (Data == null) return;
 
-        // 1. Обновляем пол (цвет, если занято)
-        if (Data.IsOccupied)
-            floorRenderer.material.color = occupiedFloorColor;
-        else
-            floorRenderer.material.color = defaultFloorColor;
+        UpdateFloor();
+        UpdateWalls();
+        UpdateOccupantIcon();
+    }
 
-        // 2. Обновляем стены: отключаем ту, где есть соединение
-        northWall.SetActive(!Data.CanMove(Directions.North));
-        eastWall.SetActive(!Data.CanMove(Directions.East));
-        southWall.SetActive(!Data.CanMove(Directions.South));
-        westWall.SetActive(!Data.CanMove(Directions.West));
+    /// <summary>
+    /// Обновляет цвет пола в зависимости от занятости клетки.
+    /// </summary>
+    private void UpdateFloor()
+    {
+        if (_floorRenderer == null) return;
 
-        // 3. Иконка объекта (если есть)
-        if (occupantIcon != null)
+        _floorRenderer.material.color = Data.IsOccupied
+            ? _occupiedFloorColor
+            : _defaultFloorColor;
+    }
+
+    /// <summary>
+    /// Включает и отключает стены в зависимости от соединений клетки.
+    /// </summary>
+    private void UpdateWalls()
+    {
+        if (_northWall != null)
+            _northWall.SetActive(!Data.CanMove(Directions.North));
+
+        if (_eastWall != null)
+            _eastWall.SetActive(!Data.CanMove(Directions.East));
+
+        if (_southWall != null)
+            _southWall.SetActive(!Data.CanMove(Directions.South));
+
+        if (_westWall != null)
+            _westWall.SetActive(!Data.CanMove(Directions.West));
+    }
+
+    /// <summary>
+    /// Обновляет иконку объекта, стоящего в клетке.
+    /// </summary>
+    private void UpdateOccupantIcon()
+    {
+        if (_occupantIcon == null) return;
+
+        if (Data.IsOccupied && Data.Occupant != null)
         {
-            if (Data.IsOccupied && Data.Occupant != null)
+            var spriteRenderer = Data.Occupant.GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
             {
-                var spr = Data.Occupant.GetComponent<SpriteRenderer>();
-                if (spr != null)
-                {
-                    occupantIcon.sprite = spr.sprite;
-                    occupantIcon.color = spr.color;
-                }
-                occupantIcon.gameObject.SetActive(true);
+                _occupantIcon.sprite = spriteRenderer.sprite;
+                _occupantIcon.color = spriteRenderer.color;
             }
-            else
-            {
-                occupantIcon.gameObject.SetActive(false);
-            }
+
+            _occupantIcon.gameObject.SetActive(true);
+        }
+        else
+        {
+            _occupantIcon.gameObject.SetActive(false);
         }
     }
 
-    // Опционально: клик по ячейке
     private void OnMouseDown()
     {
-        Debug.Log($"Clicked on cell {Data.Position}");
+        if (Data == null) return;
+
+        Debug.Log($"[CellVisual] Клик по клетке {Data.Position}");
     }
 }

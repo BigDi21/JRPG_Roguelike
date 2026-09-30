@@ -521,18 +521,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
-      propertyPath: _cellPrefab
-      value: 
-      objectReference: {fileID: 848303480885075875, guid: 6be158df36b9b1a48b73760088033431, type: 3}
-    - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
-      propertyPath: _startMarker
-      value: 
-      objectReference: {fileID: 10136497813677265, guid: a720107d729ae8c4ea576a1971c41e44, type: 3}
-    - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
-      propertyPath: _finishMarker
-      value: 
-      objectReference: {fileID: 1628907840296366201, guid: 8c02e04a5da69cd4fbea4d2af08cae28, type: 3}
     - target: {fileID: 5547269393730807899, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: m_LocalPosition.x
       value: 4.46895

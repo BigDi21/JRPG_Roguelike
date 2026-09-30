@@ -1,81 +1,108 @@
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Управляет перемещением игрока по сетке и его поворотами.
+/// </summary>
+[DefaultExecutionOrder(0)]
 public class PlayerMovement : MonoBehaviour
 {
+    private const float RotationStep = 90f;
+    private const int DirectionCount = 4;
+
+    private static readonly Directions[] DirectionOrder =
+    {
+        Directions.North,
+        Directions.East,
+        Directions.South,
+        Directions.West
+    };
+
     [Header("Ссылки")]
-    public GridManager gridManager;
+    [SerializeField] private GridManager _gridManager;
 
     [Header("Настройки анимации")]
-    public float moveDuration = 0.2f;    // время перемещения между ячейками
-    public float rotateDuration = 0.15f; // время поворота на 90°
+    [SerializeField] private float _moveDuration = 0.2f;
+    [SerializeField] private float _rotateDuration = 0.15f;
+
+    /// <summary>Идёт ли сейчас анимация перемещения.</summary>
     public bool IsMoving { get; private set; }
 
     private Vector2Int _currentGridPos;
     private Directions _facingDirection = Directions.North;
     private Cell _currentCell;
-    private Cell _targetCell;
+    private bool _isAnimating;
 
-    private bool _isAnimating = false;   // блокировка ввода во время анимации
+    /// <summary>
+    /// Ленивая инициализация GridManager.
+    /// </summary>
+    private GridManager Grid => _gridManager != null ? _gridManager : (_gridManager = GridManager.Instance);
 
-    void Start()
+    private void Start()
     {
-        if (gridManager == null)
-            gridManager = GridManager.Instance;
+        if (Grid == null)
+        {
+            Debug.LogError("[PlayerMovement] GridManager не найден!");
+            enabled = false;
+            return;
+        }
 
-        _currentGridPos = gridManager.StartPosition;
-        _currentCell = gridManager.GetCell(_currentGridPos);
+        InitializeAtStartPosition();
+    }
+
+    private void Update()
+    {
+        if (_isAnimating) return;
+
+        HandleInput();
+
+        if (Input.GetKeyDown(KeyCode.J) && MapManager.Instance != null)
+            MapManager.Instance.ToggleFog();
+    }
+
+    // ======== ИНИЦИАЛИЗАЦИЯ ========
+
+    private void InitializeAtStartPosition()
+    {
+        _currentGridPos = Grid.StartPosition;
+        _currentCell = Grid.GetCell(_currentGridPos);
+
         if (_currentCell != null)
         {
             _currentCell.SetOccupant(gameObject);
-            transform.position = gridManager.GetWorldPosition(_currentGridPos);
+            transform.position = Grid.GetWorldPosition(_currentGridPos);
         }
 
         if (MapManager.Instance != null)
             MapManager.Instance.UpdateMap(_currentGridPos, _facingDirection);
     }
 
-    void Update()
-    {
-        if (_isAnimating) return; // блокируем ввод во время анимации
-
-        HandleInput();
-
-        if (Input.GetKeyDown(KeyCode.J))
-        {
-            MapManager.Instance.ToggleFog();
-        }
-
-    }
+    // ======== ВВОД ========
 
     private void HandleInput()
     {
-        if (Input.GetKeyDown(KeyCode.Q))
-            Rotate(-90);
-        else if (Input.GetKeyDown(KeyCode.E))
-            Rotate(90);
+        if (Input.GetKeyDown(KeyCode.Q)) Rotate(-RotationStep);
+        else if (Input.GetKeyDown(KeyCode.E)) Rotate(RotationStep);
 
-        if (Input.GetKeyDown(KeyCode.W))
-            TryMove(Directions.North);
-        else if (Input.GetKeyDown(KeyCode.S))
-            TryMove(Directions.South);
-        else if (Input.GetKeyDown(KeyCode.A))
-            TryMove(Directions.West);
-        else if (Input.GetKeyDown(KeyCode.D))
-            TryMove(Directions.East);
+        if (Input.GetKeyDown(KeyCode.W)) TryMove(Directions.North);
+        else if (Input.GetKeyDown(KeyCode.S)) TryMove(Directions.South);
+        else if (Input.GetKeyDown(KeyCode.A)) TryMove(Directions.West);
+        else if (Input.GetKeyDown(KeyCode.D)) TryMove(Directions.East);
     }
 
-    private void Rotate(int angle)
+    // ======== ПОВОРОТ ========
+
+    private void Rotate(float angle)
     {
         if (_isAnimating) return;
 
-        Directions[] dirOrder = { Directions.North, Directions.East, Directions.South, Directions.West };
-        int currentIndex = System.Array.IndexOf(dirOrder, _facingDirection);
-        int newIndex = (currentIndex + (angle / 90) + 4) % 4;
-        _facingDirection = dirOrder[newIndex];
+        int currentIndex = System.Array.IndexOf(DirectionOrder, _facingDirection);
+        int newIndex = (currentIndex + Mathf.RoundToInt(angle / RotationStep) + DirectionCount) % DirectionCount;
+        _facingDirection = DirectionOrder[newIndex];
 
-        float targetAngle = newIndex * 90f;
+        float targetAngle = newIndex * RotationStep;
         StartCoroutine(RotateSmoothly(targetAngle));
+
         if (MapManager.Instance != null)
             MapManager.Instance.UpdateMap(_currentGridPos, _facingDirection);
     }
@@ -83,47 +110,52 @@ public class PlayerMovement : MonoBehaviour
     private IEnumerator RotateSmoothly(float targetAngle)
     {
         _isAnimating = true;
+
         Quaternion startRot = transform.rotation;
         Quaternion endRot = Quaternion.Euler(0, targetAngle, 0);
         float elapsed = 0f;
 
-        while (elapsed < rotateDuration)
+        while (elapsed < _rotateDuration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / rotateDuration;
+            float t = elapsed / _rotateDuration;
             transform.rotation = Quaternion.Slerp(startRot, endRot, t);
             yield return null;
         }
+
         transform.rotation = endRot;
         _isAnimating = false;
     }
+
+    // ======== ПЕРЕМЕЩЕНИЕ ========
 
     private void TryMove(Directions relativeDir)
     {
         Directions absoluteDir = RelativeToAbsolute(relativeDir);
         if (absoluteDir == Directions.None) return;
 
-        if (!_currentCell.CanMove(absoluteDir))
+        if (_currentCell == null || !_currentCell.CanMove(absoluteDir))
         {
-            Debug.Log("Стена!");
+            Debug.Log("[PlayerMovement] Стена!");
             return;
         }
 
         Vector2Int targetPos = _currentGridPos + GetOffset(absoluteDir);
-        _targetCell = gridManager.GetCell(targetPos);
-        if (_targetCell == null)
+        Cell targetCell = Grid.GetCell(targetPos);
+
+        if (targetCell == null)
         {
-            Debug.Log("За пределами сетки!");
+            Debug.Log("[PlayerMovement] За пределами сетки!");
             return;
         }
 
-        if (_targetCell.IsOccupied)
+        if (targetCell.IsOccupied)
         {
-            Debug.Log("Ячейка занята!");
+            Debug.Log("[PlayerMovement] Ячейка занята!");
             return;
         }
 
-        MoveToCell(_targetCell);
+        MoveToCell(targetCell);
     }
 
     private void MoveToCell(Cell targetCell)
@@ -134,7 +166,7 @@ public class PlayerMovement : MonoBehaviour
         _currentCell.SetOccupant(gameObject);
 
         Vector3 startPos = transform.position;
-        Vector3 endPos = gridManager.GetWorldPosition(_currentGridPos);
+        Vector3 endPos = Grid.GetWorldPosition(_currentGridPos);
         StartCoroutine(MoveSmoothly(startPos, endPos));
 
         if (MapManager.Instance != null)
@@ -144,20 +176,24 @@ public class PlayerMovement : MonoBehaviour
     private IEnumerator MoveSmoothly(Vector3 startPos, Vector3 endPos)
     {
         _isAnimating = true;
-        IsMoving = true; // движение началось
+        IsMoving = true;
+
         float elapsed = 0f;
 
-        while (elapsed < moveDuration)
+        while (elapsed < _moveDuration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / moveDuration;
+            float t = elapsed / _moveDuration;
             transform.position = Vector3.Lerp(startPos, endPos, t);
             yield return null;
         }
+
         transform.position = endPos;
         _isAnimating = false;
-        IsMoving = false; // движение закончилось
+        IsMoving = false;
     }
+
+    // ======== НАПРАВЛЕНИЯ ========
 
     private Directions RelativeToAbsolute(Directions relative)
     {
@@ -185,10 +221,9 @@ public class PlayerMovement : MonoBehaviour
 
     private Directions RotateDirection(Directions dir, int steps)
     {
-        Directions[] order = { Directions.North, Directions.East, Directions.South, Directions.West };
-        int idx = System.Array.IndexOf(order, dir);
-        int newIdx = (idx + steps + 4) % 4;
-        return order[newIdx];
+        int idx = System.Array.IndexOf(DirectionOrder, dir);
+        int newIdx = (idx + steps + DirectionCount) % DirectionCount;
+        return DirectionOrder[newIdx];
     }
 
     private Vector2Int GetOffset(Directions dir)

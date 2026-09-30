@@ -317,11 +317,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbbe403d097c06a4aba2100d4464ee0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapTile
-  floor: {fileID: 7593801417280031206}
-  northWall: {fileID: 6752322107777981479}
-  eastWall: {fileID: 2792621888732573298}
-  southWall: {fileID: 4836850926267405254}
-  westWall: {fileID: 6903981034402575362}
+  _floor: {fileID: 7593801417280031206}
+  _northWall: {fileID: 6752322107777981479}
+  _eastWall: {fileID: 2792621888732573298}
+  _southWall: {fileID: 4836850926267405254}
+  _westWall: {fileID: 6903981034402575362}
 --- !u!1 &7930437174709299118
 GameObject:
   m_ObjectHideFlags: 0

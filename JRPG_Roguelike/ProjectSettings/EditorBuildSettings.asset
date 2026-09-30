@@ -6,16 +6,16 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Prototype of the movement system.unity
+    path: Assets/_Project/Scenes/Prototype of the movement system.unity
     guid: 12c7b698a7c122e4bbf028eeaa539592
   - enabled: 1
-    path: Assets/Scenes/Bootstrap.unity
+    path: Assets/_Project/Scenes/Bootstrap.unity
     guid: 4e06d9d20f9eb7d4fb1f2539ee24b142
   - enabled: 1
-    path: Assets/Scenes/Lobby.unity
+    path: Assets/_Project/Scenes/Lobby.unity
     guid: 64d4bae7a693f8442a6cf20708d6f44f
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/_Project/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

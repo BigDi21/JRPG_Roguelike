@@ -1,17 +1,34 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Визуальное представление одного тайла миникарты.
+/// Отображает пол и стены в зависимости от соединений клетки.
+/// </summary>
 public class MapTile : MonoBehaviour
 {
-    public Image floor;
-    public Image northWall;
-    public Image eastWall;
-    public Image southWall;
-    public Image westWall;
+    [Header("Пол")]
+    [SerializeField] private Image _floor;
 
+    [Header("Стены")]
+    [SerializeField] private Image _northWall;
+    [SerializeField] private Image _eastWall;
+    [SerializeField] private Image _southWall;
+    [SerializeField] private Image _westWall;
+
+    /// <summary>
+    /// Инициализирует тайл данными клетки.
+    /// </summary>
+    /// <param name="cellData">Данные клетки.</param>
+    /// <param name="showFog">Учитывать ли туман войны. True — скрывать неоткрытые клетки.</param>
     public void Initialize(Cell cellData, bool showFog = true)
     {
-        // Если туман войны включен, показываем только открытые ячейки
+        if (cellData == null)
+        {
+            Debug.LogError("[MapTile] Передан null вместо данных клетки!");
+            return;
+        }
+
         if (showFog && !cellData.IsDiscovered)
         {
             gameObject.SetActive(false);
@@ -19,12 +36,36 @@ public class MapTile : MonoBehaviour
         }
 
         gameObject.SetActive(true);
-        floor.color = Color.white;
+        UpdateFloor();
+        UpdateWalls(cellData);
+    }
 
-        // Стены: отключаем те, где есть проход
-        northWall.gameObject.SetActive(!cellData.CanMove(Directions.North));
-        eastWall.gameObject.SetActive(!cellData.CanMove(Directions.East));
-        southWall.gameObject.SetActive(!cellData.CanMove(Directions.South));
-        westWall.gameObject.SetActive(!cellData.CanMove(Directions.West));
+    /// <summary>
+    /// Устанавливает стандартный цвет пола.
+    /// </summary>
+    private void UpdateFloor()
+    {
+        if (_floor == null) return;
+
+        _floor.color = Color.white;
+    }
+
+    /// <summary>
+    /// Включает стены там, где нет прохода.
+    /// </summary>
+    /// <param name="cellData">Данные клетки.</param>
+    private void UpdateWalls(Cell cellData)
+    {
+        if (_northWall != null)
+            _northWall.gameObject.SetActive(!cellData.CanMove(Directions.North));
+
+        if (_eastWall != null)
+            _eastWall.gameObject.SetActive(!cellData.CanMove(Directions.East));
+
+        if (_southWall != null)
+            _southWall.gameObject.SetActive(!cellData.CanMove(Directions.South));
+
+        if (_westWall != null)
+            _westWall.gameObject.SetActive(!cellData.CanMove(Directions.West));
     }
 }

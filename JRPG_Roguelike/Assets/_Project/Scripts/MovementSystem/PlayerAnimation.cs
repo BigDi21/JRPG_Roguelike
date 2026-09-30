@@ -1,23 +1,27 @@
 using UnityEngine;
 
+/// <summary>
+/// Управляет анимациями игрока на основе состояния <see cref="PlayerMovement"/>.
+/// </summary>
 public class PlayerAnimation : MonoBehaviour
 {
-    private Animator _animator;
-    [SerializeField]
-    private PlayerMovement _movement;
+    [Header("Ссылки")]
+    [SerializeField] private PlayerMovement _movement;
 
-    void Start()
+    private Animator _animator;
+
+    private void Start()
     {
         _animator = GetComponent<Animator>();
-        //_movement = GetComponent<PlayerMovement>();
+
+        if (_animator == null)
+            Debug.LogError($"[PlayerAnimation] На {gameObject.name} отсутствует компонент Animator!");
     }
 
-    void Update()
+    private void Update()
     {
-        if (_movement == null) return;
+        if (_movement == null || _animator == null) return;
 
-        // Используем флаг из PlayerMovement
-        bool isRunning = _movement.IsMoving;
-        _animator.SetBool("isRune", isRunning);
+        _animator.SetBool("isRune", _movement.IsMoving);
     }
 }

@@ -1,21 +1,30 @@
 using SimpleJRPG;
 using UnityEngine;
 
+/// <summary>
+/// Эффект временного ослабления характеристики цели.
+/// </summary>
 [CreateAssetMenu(fileName = "NewDebuffEffect", menuName = "JRPG/Effects/DebuffEnemy")]
 public class DebuffEnemyEffect : Effect
 {
-    public string statName; // "Strength", "Defense", "Magic"
-    public int penalty;
-    public int duration; // в ходах
+    [Header("Настройки эффекта")]
+    [SerializeField] private string _statName = "Defense";
+    [SerializeField] private int _penalty = 5;
+    [SerializeField] private int _duration = 3;
 
+    /// <summary>Название характеристики для ослабления: Strength, Defense, Magic.</summary>
+    public string StatName => _statName;
+
+    /// <summary>Величина штрафа.</summary>
+    public int Penalty => _penalty;
+
+    /// <summary>Длительность эффекта в ходах.</summary>
+    public int Duration => _duration;
+
+    /// <inheritdoc />
     public override void Apply(ICombatant caster, ICombatant target)
     {
-        // Временно ослабляем stat у target'а на penalty ходов
-        Debug.Log($"{target.Name} ослаблен: -{penalty} к {statName} на {duration} ходов.");
-        // Здесь вызывается метод для добавления дебаффа
-        if (caster.Team == 0)
-        {
-            // enemy.ApplyDebuff(statName, penalty, duration);
-        }
+        // TODO: реализовать систему временных дебаффов в StatsComponent
+        Debug.Log($"{target.Name} ослаблен: -{_penalty} к {_statName} на {_duration} ходов.");
     }
 }

@@ -162,14 +162,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b103e6b72667fe440994883e4dd09635, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CellVisual
-  floorRenderer: {fileID: 4920301893714272799}
-  northWall: {fileID: 8115376812867336757}
-  eastWall: {fileID: 4140985646677956822}
-  southWall: {fileID: 1959869212574312575}
-  westWall: {fileID: 6476043630582801056}
-  occupantIcon: {fileID: 0}
-  defaultFloorColor: {r: 1, g: 1, b: 1, a: 1}
-  occupiedFloorColor: {r: 1, g: 0, b: 0, a: 1}
+  _floorRenderer: {fileID: 4920301893714272799}
+  _northWall: {fileID: 8115376812867336757}
+  _eastWall: {fileID: 4140985646677956822}
+  _southWall: {fileID: 1959869212574312575}
+  _westWall: {fileID: 6476043630582801056}
+  _occupantIcon: {fileID: 0}
+  _defaultFloorColor: {r: 1, g: 1, b: 1, a: 1}
+  _occupiedFloorColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &1959869212574312575
 GameObject:
   m_ObjectHideFlags: 0
