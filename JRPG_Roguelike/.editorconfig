@@ -1,0 +1,131 @@
+# .editorconfig — правила форматирования для проекта «Пламя Дракона»
+
+root = true
+
+# ============================================================
+# ОБЩИЕ ПРАВИЛА ДЛЯ ВСЕХ ФАЙЛОВ
+# ============================================================
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# ============================================================
+# C# — ОСНОВНЫЕ ПРАВИЛА
+# ============================================================
+
+[*.cs]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+# --- Скобки (Allman) ---
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+
+# --- Отступы ---
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+csharp_indent_labels = flush_left
+
+# --- Пробелы ---
+csharp_space_after_cast = false
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_before_colon_in_inheritance_clause = true
+csharp_space_after_colon_in_inheritance_clause = true
+csharp_space_around_binary_operators = before_and_after
+
+# --- Переносы строк ---
+csharp_preserve_single_line_statements = false
+csharp_preserve_single_line_blocks = true
+
+# ============================================================
+# ИМЕНОВАНИЕ (NAMING)
+# ============================================================
+
+# Приватные поля: _camelCase
+dotnet_naming_rule.private_fields_underscore.severity = warning
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel_case
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.underscore_camel_case.required_prefix = _
+dotnet_naming_style.underscore_camel_case.capitalization = camel_case
+
+# Публичные поля: PascalCase (для свойств и событий)
+dotnet_naming_rule.public_members_pascal.severity = warning
+dotnet_naming_rule.public_members_pascal.symbols = public_members
+dotnet_naming_rule.public_members_pascal.style = pascal_case
+dotnet_naming_symbols.public_members.applicable_kinds = property,event,method
+dotnet_naming_symbols.public_members.applicable_accessibilities = public,protected,internal
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+# Локальные переменные и параметры: camelCase
+dotnet_naming_rule.local_variables_camel.severity = warning
+dotnet_naming_rule.local_variables_camel.symbols = local_variables
+dotnet_naming_rule.local_variables_camel.style = camel_case
+dotnet_naming_symbols.local_variables.applicable_kinds = local,parameter
+dotnet_naming_style.camel_case.capitalization = camel_case
+
+# ============================================================
+# ПРАВИЛА ФОРМАТИРОВАНИЯ (для IDE)
+# ============================================================
+
+# this. — не использовать
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+
+# var — предпочитать для очевидных типов
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = false:suggestion
+
+# Expression-bodied методы
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_properties = true:suggestion
+csharp_style_expression_bodied_accessors = true:suggestion
+
+# using-директивы — вне namespace
+csharp_style_namespace_declarations = block_scoped:suggestion
+
+# Преферред-стиль для new()
+csharp_style_implicit_object_creation_when_type_is_apparent = true:suggestion
+
+# Порядок модификаторов
+csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async:suggestion
+
+# Скобки для однострочных операторов — всегда
+csharp_prefer_braces = true:warning
+
+# Проверки на null — использовать pattern matching
+csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
+csharp_style_pattern_matching_over_as_with_null_check = true:suggestion
+
+# ============================================================
+# ФОРМАТЫ ДРУГИХ ФАЙЛОВ
+# ============================================================
+
+[*.{json,yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+indent_style = space
+indent_size = 2
+
+[*.{xml,csproj,asmdef}]
+indent_style = space
+indent_size = 2
+
+# ============================================================
+# КОНЕЦ
+# ============================================================

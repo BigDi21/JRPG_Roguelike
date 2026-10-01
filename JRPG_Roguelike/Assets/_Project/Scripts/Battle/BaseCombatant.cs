@@ -2,44 +2,46 @@ using SimpleJRPG;
 using UnityEngine;
 
 /// <summary>
-/// Базовый класс для всех бойцов (игрок, враг).
-/// Реализует общий контракт <see cref="ICombatant"/> и хранит ссылки на компоненты.
+/// Р‘Р°Р·РѕРІС‹Р№ РєР»Р°СЃСЃ РґР»СЏ РІСЃРµС… Р±РѕР№С†РѕРІ (РёРіСЂРѕРє, РІСЂР°Рі).
+/// Р РµР°Р»РёР·СѓРµС‚ РѕР±С‰РёР№ РєРѕРЅС‚СЂР°РєС‚ <see cref="ICombatant"/> Рё С…СЂР°РЅРёС‚ СЃСЃС‹Р»РєРё РЅР° РєРѕРјРїРѕРЅРµРЅС‚С‹.
 /// </summary>
 public abstract class BaseCombatant : ICombatant
 {
-    /// <summary>Отображаемое имя бойца.</summary>
+    /// <summary>РћС‚РѕР±СЂР°Р¶Р°РµРјРѕРµ РёРјСЏ Р±РѕР№С†Р°.</summary>
     public string Name { get; protected set; }
 
-    /// <summary>Номер команды. 0 — игрок, 1 — враги.</summary>
+    /// <summary>РќРѕРјРµСЂ РєРѕРјР°РЅРґС‹. 0 вЂ” РёРіСЂРѕРє, 1 вЂ” РІСЂР°РіРё.</summary>
     public int Team { get; protected set; }
 
-    /// <summary>Жив ли боец (HP > 0).</summary>
+    /// <summary>Р–РёРІ Р»Рё Р±РѕРµС† (HP > 0).</summary>
     public bool IsAlive => HealthComponent != null && HealthComponent.CurrentHealth > 0;
 
-    /// <summary>Скорость (инициатива) бойца. По умолчанию 1, если статы не заданы.</summary>
+    /// <summary>РЎРєРѕСЂРѕСЃС‚СЊ (РёРЅРёС†РёР°С‚РёРІР°) Р±РѕР№С†Р°. РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ 1, РµСЃР»Рё СЃС‚Р°С‚С‹ РЅРµ Р·Р°РґР°РЅС‹.</summary>
     public float Speed => StatsComponent != null ? StatsComponent.Speed : 1f;
 
-    /// <summary>Компонент здоровья.</summary>
+    /// <summary>РљРѕРјРїРѕРЅРµРЅС‚ Р·РґРѕСЂРѕРІСЊСЏ.</summary>
     public HealthComponent HealthComponent { get; protected set; }
 
-    /// <summary>Компонент характеристик.</summary>
+    /// <summary>РљРѕРјРїРѕРЅРµРЅС‚ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє.</summary>
     public StatsComponent StatsComponent { get; protected set; }
 
-    /// <summary>Компонент инвентаря.</summary>
+    /// <summary>РљРѕРјРїРѕРЅРµРЅС‚ РёРЅРІРµРЅС‚Р°СЂСЏ.</summary>
     public InventoryComponent InventoryComponent { get; protected set; }
 
-    /// <summary>Компонент управления заклинаниями.</summary>
+    /// <summary>РљРѕРјРїРѕРЅРµРЅС‚ СѓРїСЂР°РІР»РµРЅРёСЏ Р·Р°РєР»РёРЅР°РЅРёСЏРјРё.</summary>
     public SpellManagerComponent SpellManagerComponent { get; protected set; }
 
     /// <summary>
-    /// Наносит бойцу урон.
+    /// РќР°РЅРѕСЃРёС‚ Р±РѕР№С†Сѓ СѓСЂРѕРЅ.
     /// </summary>
-    /// <param name="amount">Количество урона.</param>
+    /// <param name="amount">РљРѕР»РёС‡РµСЃС‚РІРѕ СѓСЂРѕРЅР°.</param>
     public abstract void TakeDamage(int amount);
 
     /// <summary>
-    /// Восстанавливает бойцу здоровье.
+    /// Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ Р±РѕР№С†Сѓ Р·РґРѕСЂРѕРІСЊРµ.
     /// </summary>
-    /// <param name="amount">Количество восстанавливаемого HP.</param>
+    /// <param name="amount">РљРѕР»РёС‡РµСЃС‚РІРѕ РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРјРѕРіРѕ HP.</param>
     public abstract void Heal(int amount);
+
+    private int _counter = 0;
 }
