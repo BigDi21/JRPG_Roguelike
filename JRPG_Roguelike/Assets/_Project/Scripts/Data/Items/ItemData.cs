@@ -1,29 +1,37 @@
 using UnityEngine;
 
 /// <summary>
-/// Данные предмета (расходника). Хранит имя, иконку, описание и эффект.
+/// Р”Р°РЅРЅС‹Рµ РїСЂРµРґРјРµС‚Р° (СЂР°СЃС…РѕРґРЅРёРєР°). РҐСЂР°РЅРёС‚ ID, РёРјСЏ, РёРєРѕРЅРєСѓ, РѕРїРёСЃР°РЅРёРµ Рё СЌС„С„РµРєС‚.
 /// </summary>
 [CreateAssetMenu(fileName = "NewItem", menuName = "JRPG/Item")]
 public class ItemData : ScriptableObject
 {
-    [Header("Настройки предмета")]
+    [Header("РРґРµРЅС‚РёС„РёРєР°С†РёСЏ")]
+    [Tooltip("РЈРЅРёРєР°Р»СЊРЅС‹Р№ ID РІ РЅРёР¶РЅРµРј СЂРµРіРёСЃС‚СЂРµ Р±РµР· РїСЂРѕР±РµР»РѕРІ. РќР°РїСЂРёРјРµСЂ: sword, potion_hp")]
+    [SerializeField] private string _id;
+
+    [Header("РћС‚РѕР±СЂР°Р¶РµРЅРёРµ")]
     [SerializeField] private string _itemName;
     [SerializeField] private Sprite _icon;
 
     [TextArea]
     [SerializeField] private string _description;
 
+    [Header("Р­С„С„РµРєС‚")]
     [SerializeReference] private Effect _effect;
 
-    /// <summary>Отображаемое имя предмета.</summary>
+    /// <summary>РЈРЅРёРєР°Р»СЊРЅС‹Р№ ID РїСЂРµРґРјРµС‚Р°.</summary>
+    public string Id => _id;
+
+    /// <summary>РћС‚РѕР±СЂР°Р¶Р°РµРјРѕРµ РёРјСЏ.</summary>
     public string ItemName => _itemName;
 
-    /// <summary>Иконка предмета.</summary>
+    /// <summary>РРєРѕРЅРєР° РїСЂРµРґРјРµС‚Р°.</summary>
     public Sprite Icon => _icon;
 
-    /// <summary>Описание предмета.</summary>
+    /// <summary>РћРїРёСЃР°РЅРёРµ.</summary>
     public string Description => _description;
 
-    /// <summary>Эффект, применяемый при использовании предмета.</summary>
+    /// <summary>Р­С„С„РµРєС‚ РїСЂРёРјРµРЅРµРЅРёСЏ.</summary>
     public Effect Effect => _effect;
 }

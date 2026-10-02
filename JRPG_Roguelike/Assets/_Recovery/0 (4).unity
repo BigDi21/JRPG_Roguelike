@@ -862,7 +862,6 @@ GameObject:
   m_Component:
   - component: {fileID: 330585546}
   - component: {fileID: 330585545}
-  - component: {fileID: 330585544}
   - component: {fileID: 330585547}
   m_Layer: 0
   m_Name: Main Camera
@@ -871,14 +870,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &330585544
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 330585543}
-  m_Enabled: 1
 --- !u!20 &330585545
 Camera:
   m_ObjectHideFlags: 0
@@ -1209,7 +1200,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1799906348}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.9956317
+  m_Size: 0.87388754
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1797,7 +1788,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 34.1
+  m_fontSize: 27.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2550,12 +2541,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf557fb6ac0d09a49ac806ba76b6ae3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatsComponent
-  Strength: 8
-  Defense: 3
-  Magic: 8
-  Speed: 2
-  MaxMana: 50
-  Mana: 50
+  _strength: 8
+  _defense: 3
+  _magic: 8
+  _speed: 1
+  _maxMana: 50
+  _mana: 50
 --- !u!114 &762577580
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2870,20 +2861,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76b62152d5d0e5943b248eb92c3684b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  ActionPanel: {fileID: 851869209}
-  InventoryPanel: {fileID: 886707791}
-  SpellPanel: {fileID: 736512348}
-  MessageText: {fileID: 18573338}
-  PlayerHealthSlider: {fileID: 59954493}
-  EnemyHealthSlider: {fileID: 393290625}
-  PlayerHealthText: {fileID: 226474342}
-  EnemyHealthText: {fileID: 2077485498}
-  PlayerManaSlider: {fileID: 1160879071}
-  PlayerManaText: {fileID: 2035334880}
-  InventoryContent: {fileID: 1907087145}
-  SpellContent: {fileID: 1323698780}
-  ItemButtonPrefab: {fileID: 1536707473405246001, guid: e79ece166b2a7fb4192e5bf4db2bdc76, type: 3}
-  SpellButtonPrefab: {fileID: 1536707473405246001, guid: e79ece166b2a7fb4192e5bf4db2bdc76, type: 3}
+  _actionPanel: {fileID: 851869209}
+  _inventoryPanel: {fileID: 886707791}
+  _spellPanel: {fileID: 736512348}
+  _messageText: {fileID: 18573338}
+  _playerHealthSlider: {fileID: 59954493}
+  _enemyHealthSlider: {fileID: 393290625}
+  _playerHealthText: {fileID: 226474342}
+  _enemyHealthText: {fileID: 2077485498}
+  _playerManaSlider: {fileID: 1160879071}
+  _playerManaText: {fileID: 2035334880}
+  _inventoryContent: {fileID: 1907087145}
+  _spellContent: {fileID: 1323698780}
+  _itemButtonPrefab: {fileID: 1536707473405246001, guid: e79ece166b2a7fb4192e5bf4db2bdc76, type: 3}
+  _spellButtonPrefab: {fileID: 1536707473405246001, guid: e79ece166b2a7fb4192e5bf4db2bdc76, type: 3}
 --- !u!1 &886707791
 GameObject:
   m_ObjectHideFlags: 0
@@ -3624,7 +3615,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 27
+  m_fontSize: 24.05
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4138,7 +4129,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 21.55
+  m_fontSize: 18.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4866,7 +4857,7 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 652091459}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.004368305}
+  m_AnchorMin: {x: 0, y: 0.12611246}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
@@ -5573,7 +5564,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24.3
+  m_fontSize: 21.3
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5655,8 +5646,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2c0d45a05f2d784298b79733b7c2aa5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleManager
-  playerGO: {fileID: 1535031498}
-  enemyGO: {fileID: 762577578}
+  _playerGO: {fileID: 1535031498}
+  _enemyGO: {fileID: 762577578}
 --- !u!4 &1999358664
 Transform:
   m_ObjectHideFlags: 0
@@ -6468,11 +6459,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2086156822224548720, guid: 32bf9eeb94e20aa4aad780b67762abaf, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -29119.8
+      value: -20296
       objectReference: {fileID: 0}
     - target: {fileID: 2086156822224548720, guid: 32bf9eeb94e20aa4aad780b67762abaf, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -14638
+      value: -9779
       objectReference: {fileID: 0}
     - target: {fileID: 2086156822224548720, guid: 32bf9eeb94e20aa4aad780b67762abaf, type: 3}
       propertyPath: m_LocalPosition.z

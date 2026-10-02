@@ -1,35 +1,44 @@
 using UnityEngine;
 
 /// <summary>
-/// Данные заклинания. Хранит имя, иконку, описание, стоимость маны и эффект.
+/// Р”Р°РЅРЅС‹Рµ Р·Р°РєР»РёРЅР°РЅРёСЏ. РҐСЂР°РЅРёС‚ ID, РёРјСЏ, РёРєРѕРЅРєСѓ, РѕРїРёСЃР°РЅРёРµ, СЃС‚РѕРёРјРѕСЃС‚СЊ РјР°РЅС‹ Рё СЌС„С„РµРєС‚.
 /// </summary>
 [CreateAssetMenu(fileName = "NewSpell", menuName = "JRPG/Spell")]
 public class SpellData : ScriptableObject
 {
-    [Header("Настройки заклинания")]
+    [Header("РРґРµРЅС‚РёС„РёРєР°С†РёСЏ")]
+    [Tooltip("РЈРЅРёРєР°Р»СЊРЅС‹Р№ ID РІ РЅРёР¶РЅРµРј СЂРµРіРёСЃС‚СЂРµ Р±РµР· РїСЂРѕР±РµР»РѕРІ. РќР°РїСЂРёРјРµСЂ: fireball, heal")]
+    [SerializeField] private string _id;
+
+    [Header("РћС‚РѕР±СЂР°Р¶РµРЅРёРµ")]
     [SerializeField] private string _spellName;
     [SerializeField] private Sprite _icon;
 
     [TextArea]
     [SerializeField] private string _description;
 
+    [Header("РЎС‚РѕРёРјРѕСЃС‚СЊ")]
     [Min(0)]
     [SerializeField] private int _manaCost;
 
+    [Header("Р­С„С„РµРєС‚")]
     [SerializeReference] private Effect _effect;
 
-    /// <summary>Отображаемое имя заклинания.</summary>
+    /// <summary>РЈРЅРёРєР°Р»СЊРЅС‹Р№ ID Р·Р°РєР»РёРЅР°РЅРёСЏ.</summary>
+    public string Id => _id;
+
+    /// <summary>РћС‚РѕР±СЂР°Р¶Р°РµРјРѕРµ РёРјСЏ.</summary>
     public string SpellName => _spellName;
 
-    /// <summary>Иконка заклинания.</summary>
+    /// <summary>РРєРѕРЅРєР°.</summary>
     public Sprite Icon => _icon;
 
-    /// <summary>Описание заклинания.</summary>
+    /// <summary>РћРїРёСЃР°РЅРёРµ.</summary>
     public string Description => _description;
 
-    /// <summary>Стоимость применения в мане.</summary>
+    /// <summary>РЎС‚РѕРёРјРѕСЃС‚СЊ РїСЂРёРјРµРЅРµРЅРёСЏ РІ РјР°РЅРµ.</summary>
     public int ManaCost => _manaCost;
 
-    /// <summary>Эффект, применяемый при использовании заклинания.</summary>
+    /// <summary>Р­С„С„РµРєС‚ Р·Р°РєР»РёРЅР°РЅРёСЏ.</summary>
     public Effect Effect => _effect;
 }

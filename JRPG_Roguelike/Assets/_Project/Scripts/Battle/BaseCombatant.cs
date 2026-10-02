@@ -43,5 +43,5 @@ public abstract class BaseCombatant : ICombatant
     /// <param name="amount">Количество восстанавливаемого HP.</param>
     public abstract void Heal(int amount);
 
-    private int _counter = 0;
+    private readonly int _counter = 0;
 }
