@@ -5,29 +5,29 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Управляет боевым UI: панелями действий, инвентарём, заклинаниями, полосами HP/маны и сообщениями.
+/// РЈРїСЂР°РІР»СЏРµС‚ Р±РѕРµРІС‹Рј UI: РїР°РЅРµР»СЏРјРё РґРµР№СЃС‚РІРёР№, РёРЅРІРµРЅС‚Р°СЂС‘Рј, Р·Р°РєР»РёРЅР°РЅРёСЏРјРё, РїРѕР»РѕСЃР°РјРё HP/РјР°РЅС‹ Рё СЃРѕРѕР±С‰РµРЅРёСЏРјРё.
 /// </summary>
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
 
-    [Header("Панели")]
+    [Header("РџР°РЅРµР»Рё")]
     [SerializeField] private GameObject _actionPanel;
     [SerializeField] private GameObject _inventoryPanel;
     [SerializeField] private GameObject _spellPanel;
     [SerializeField] private TMP_Text _messageText;
 
-    [Header("Полосы здоровья")]
+    [Header("РџРѕР»РѕСЃС‹ Р·РґРѕСЂРѕРІСЊСЏ")]
     [SerializeField] private Slider _playerHealthSlider;
     [SerializeField] private Slider _enemyHealthSlider;
     [SerializeField] private TMP_Text _playerHealthText;
     [SerializeField] private TMP_Text _enemyHealthText;
 
-    [Header("Полоса маны")]
+    [Header("РџРѕР»РѕСЃР° РјР°РЅС‹")]
     [SerializeField] private Slider _playerManaSlider;
     [SerializeField] private TMP_Text _playerManaText;
 
-    [Header("Инвентарь и заклинания")]
+    [Header("РРЅРІРµРЅС‚Р°СЂСЊ Рё Р·Р°РєР»РёРЅР°РЅРёСЏ")]
     [SerializeField] private Transform _inventoryContent;
     [SerializeField] private Transform _spellContent;
     [SerializeField] private GameObject _itemButtonPrefab;
@@ -56,13 +56,15 @@ public class UIManager : MonoBehaviour
         SetPanelsActive(false, false, false);
 
         if (_messageText != null)
+        {
             _messageText.text = string.Empty;
+        }
     }
 
-    // ======== ИНИЦИАЛИЗАЦИЯ ========
+    // ======== РРќРР¦РРђР›РР—РђР¦РРЇ ========
 
     /// <summary>
-    /// Привязывает UI к компонентам игрока и врага.
+    /// РџСЂРёРІСЏР·С‹РІР°РµС‚ UI Рє РєРѕРјРїРѕРЅРµРЅС‚Р°Рј РёРіСЂРѕРєР° Рё РІСЂР°РіР°.
     /// </summary>
     public void Initialize(
         HealthComponent playerHealth,
@@ -88,19 +90,27 @@ public class UIManager : MonoBehaviour
     private void SubscribeToHealthEvents()
     {
         if (_playerHealth != null)
+        {
             _playerHealth.OnHealthChanged += OnHealthChanged;
+        }
 
         if (_enemyHealth != null)
+        {
             _enemyHealth.OnHealthChanged += OnHealthChanged;
+        }
     }
 
     private void UnsubscribeFromHealthEvents()
     {
         if (_playerHealth != null)
+        {
             _playerHealth.OnHealthChanged -= OnHealthChanged;
+        }
 
         if (_enemyHealth != null)
+        {
             _enemyHealth.OnHealthChanged -= OnHealthChanged;
+        }
     }
 
     private void OnDestroy()
@@ -108,18 +118,17 @@ public class UIManager : MonoBehaviour
         UnsubscribeFromHealthEvents();
 
         if (Instance == this)
+        {
             Instance = null;
+        }
     }
 
-    private void OnHealthChanged(int current, int max)
-    {
-        UpdateHealthUI();
-    }
+    private void OnHealthChanged(int current, int max) => UpdateHealthUI();
 
-    // ======== ОБНОВЛЕНИЕ UI ========
+    // ======== РћР‘РќРћР’Р›Р•РќРР• UI ========
 
     /// <summary>
-    /// Обновляет полосы и тексты здоровья игрока и врага.
+    /// РћР±РЅРѕРІР»СЏРµС‚ РїРѕР»РѕСЃС‹ Рё С‚РµРєСЃС‚С‹ Р·РґРѕСЂРѕРІСЊСЏ РёРіСЂРѕРєР° Рё РІСЂР°РіР°.
     /// </summary>
     public void UpdateHealthUI()
     {
@@ -129,52 +138,75 @@ public class UIManager : MonoBehaviour
 
     private void UpdatePlayerHealthUI()
     {
-        if (_playerHealth == null) return;
+        if (_playerHealth == null)
+        {
+            return;
+        }
 
         if (_playerHealthSlider != null)
+        {
             _playerHealthSlider.value = (float)_playerHealth.CurrentHealth / _playerHealth.MaxHealth;
+        }
 
         if (_playerHealthText != null)
+        {
             _playerHealthText.text = $"{_playerHealth.CurrentHealth}/{_playerHealth.MaxHealth}";
+        }
     }
 
     private void UpdateEnemyHealthUI()
     {
-        if (_enemyHealth == null) return;
+        if (_enemyHealth == null)
+        {
+            return;
+        }
 
         if (_enemyHealthSlider != null)
+        {
             _enemyHealthSlider.value = (float)_enemyHealth.CurrentHealth / _enemyHealth.MaxHealth;
+        }
 
         if (_enemyHealthText != null)
+        {
             _enemyHealthText.text = $"{_enemyHealth.CurrentHealth}/{_enemyHealth.MaxHealth}";
+        }
     }
 
     /// <summary>
-    /// Обновляет полосу и текст маны игрока.
+    /// РћР±РЅРѕРІР»СЏРµС‚ РїРѕР»РѕСЃСѓ Рё С‚РµРєСЃС‚ РјР°РЅС‹ РёРіСЂРѕРєР°.
     /// </summary>
     public void UpdateManaUI()
     {
-        if (_playerStats == null) return;
+        if (_playerStats == null)
+        {
+            return;
+        }
 
         if (_playerManaSlider != null)
+        {
             _playerManaSlider.value = (float)_playerStats.Mana / _playerStats.MaxMana;
+        }
 
         if (_playerManaText != null)
+        {
             _playerManaText.text = $"{_playerStats.Mana}/{_playerStats.MaxMana}";
+        }
     }
 
-    // ======== НАПОЛНЕНИЕ СПИСКОВ ========
+    // ======== РќРђРџРћР›РќР•РќРР• РЎРџРРЎРљРћР’ ========
 
     private void PopulateInventoryUI()
     {
         ClearChildren(_inventoryContent);
 
         if (_playerInventory == null || _itemButtonPrefab == null || _inventoryContent == null)
-            return;
-
-        foreach (var item in _playerInventory.Items)
         {
-            var button = CreateButton(_itemButtonPrefab, _inventoryContent);
+            return;
+        }
+
+        foreach (ItemData item in _playerInventory.Items)
+        {
+            Button button = CreateButton(_itemButtonPrefab, _inventoryContent);
             SetButtonText(button, item.ItemName);
             button.onClick.AddListener(() => BattleManager.Instance.PlayerUseItem(item));
         }
@@ -185,108 +217,132 @@ public class UIManager : MonoBehaviour
         ClearChildren(_spellContent);
 
         if (_playerSpells == null || _spellButtonPrefab == null || _spellContent == null)
-            return;
-
-        foreach (var spell in _playerSpells.Spells)
         {
-            var button = CreateButton(_spellButtonPrefab, _spellContent);
+            return;
+        }
+
+        foreach (SpellData spell in _playerSpells.Spells)
+        {
+            Button button = CreateButton(_spellButtonPrefab, _spellContent);
             SetButtonText(button, $"{spell.SpellName} (MP: {spell.ManaCost})");
             button.onClick.AddListener(() => BattleManager.Instance.PlayerCastSpell(spell));
         }
     }
 
-    private static Button CreateButton(GameObject prefab, Transform parent)
-    {
-        return Instantiate(prefab, parent).GetComponent<Button>();
-    }
+    private static Button CreateButton(GameObject prefab, Transform parent) => Instantiate(prefab, parent).GetComponent<Button>();
 
     private static void SetButtonText(Button button, string text)
     {
-        var label = button.GetComponentInChildren<TMP_Text>();
+        TMP_Text label = button.GetComponentInChildren<TMP_Text>();
         if (label != null)
+        {
             label.text = text;
+        }
     }
 
     private static void ClearChildren(Transform parent)
     {
-        if (parent == null) return;
+        if (parent == null)
+        {
+            return;
+        }
 
         foreach (Transform child in parent)
+        {
             Destroy(child.gameObject);
+        }
     }
 
-    // ======== ПАНЕЛИ ========
+    // ======== РџРђРќР•Р›Р ========
 
     /// <summary>
-    /// Показывает панель действий игрока.
+    /// РџРѕРєР°Р·С‹РІР°РµС‚ РїР°РЅРµР»СЊ РґРµР№СЃС‚РІРёР№ РёРіСЂРѕРєР°.
     /// </summary>
     public void ShowActionPanel()
     {
         if (_actionPanel != null)
+        {
             _actionPanel.SetActive(true);
+        }
     }
 
     /// <summary>
-    /// Скрывает панель действий игрока.
+    /// РЎРєСЂС‹РІР°РµС‚ РїР°РЅРµР»СЊ РґРµР№СЃС‚РІРёР№ РёРіСЂРѕРєР°.
     /// </summary>
     public void HideActionPanel()
     {
         if (_actionPanel != null)
+        {
             _actionPanel.SetActive(false);
+        }
     }
 
     /// <summary>
-    /// Переключает видимость панели инвентаря.
+    /// РџРµСЂРµРєР»СЋС‡Р°РµС‚ РІРёРґРёРјРѕСЃС‚СЊ РїР°РЅРµР»Рё РёРЅРІРµРЅС‚Р°СЂСЏ.
     /// </summary>
     public void ShowInventory()
     {
-        if (_inventoryPanel == null) return;
+        if (_inventoryPanel == null)
+        {
+            return;
+        }
 
         _inventoryPanel.SetActive(!_inventoryPanel.activeSelf);
 
         if (_inventoryPanel.activeSelf)
+        {
             PopulateInventoryUI();
+        }
     }
 
     /// <summary>
-    /// Переключает видимость панели заклинаний.
+    /// РџРµСЂРµРєР»СЋС‡Р°РµС‚ РІРёРґРёРјРѕСЃС‚СЊ РїР°РЅРµР»Рё Р·Р°РєР»РёРЅР°РЅРёР№.
     /// </summary>
     public void ShowSpells()
     {
-        if (_spellPanel == null) return;
+        if (_spellPanel == null)
+        {
+            return;
+        }
 
         _spellPanel.SetActive(!_spellPanel.activeSelf);
 
         if (_spellPanel.activeSelf)
+        {
             PopulateSpellUI();
+        }
     }
 
-    // ======== СООБЩЕНИЯ ========
+    // ======== РЎРћРћР‘Р©Р•РќРРЇ ========
 
     /// <summary>
-    /// Показывает текстовое сообщение в UI.
+    /// РџРѕРєР°Р·С‹РІР°РµС‚ С‚РµРєСЃС‚РѕРІРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ РІ UI.
     /// </summary>
     public void ShowMessage(string message)
     {
         if (_messageText != null)
+        {
             _messageText.text = message;
+        }
     }
 
     /// <summary>
-    /// Показывает результат боя и скрывает все панели действий.
+    /// РџРѕРєР°Р·С‹РІР°РµС‚ СЂРµР·СѓР»СЊС‚Р°С‚ Р±РѕСЏ Рё СЃРєСЂС‹РІР°РµС‚ РІСЃРµ РїР°РЅРµР»Рё РґРµР№СЃС‚РІРёР№.
     /// </summary>
     public void ShowBattleResult(BattleState state)
     {
-        string result = state == BattleState.Victory ? "Победа!" : "Поражение...";
+        var result = state == BattleState.Victory ? "РџРѕР±РµРґР°!" : "РџРѕСЂР°Р¶РµРЅРёРµ...";
 
         if (_messageText != null)
+        {
             _messageText.text = result;
+        }
 
         SetPanelsActive(false, false, false);
     }
 
     /// <summary>
-    /// Обновляет все элементы UI (HP, мана, инвентарь, заклинания).
+    /// РћР±РЅРѕРІР»СЏРµС‚ РІСЃРµ СЌР»РµРјРµРЅС‚С‹ UI (HP, РјР°РЅР°, РёРЅРІРµРЅС‚Р°СЂСЊ, Р·Р°РєР»РёРЅР°РЅРёСЏ).
     /// </summary>
     public void RefreshUI()
     {
@@ -296,17 +352,32 @@ public class UIManager : MonoBehaviour
         PopulateSpellUI();
     }
 
-    // ======== ВСПОМОГАТЕЛЬНЫЕ ========
+    // ======== Р’РЎРџРћРњРћР“РђРўР•Р›Р¬РќР«Р• ========
 
     private void SetPanelsActive(bool action, bool inventory, bool spells)
     {
         if (_actionPanel != null)
+        {
             _actionPanel.SetActive(action);
+        }
 
         if (_inventoryPanel != null)
+        {
             _inventoryPanel.SetActive(inventory);
+        }
 
         if (_spellPanel != null)
+        {
             _spellPanel.SetActive(spells);
+        }
     }
+
+    private void OnEnable() => EventBus.Subscribe<GameEvents.DamageEvent>(OnDamageEvent);
+
+    private void OnDisable() => EventBus.Unsubscribe<GameEvents.DamageEvent>(OnDamageEvent);
+
+    private void OnDamageEvent(GameEvents.DamageEvent e) =>
+        // РџРѕРєР° РЅРёС‡РµРіРѕ РЅРµ РґРµР»Р°РµРј вЂ” РїСЂРѕСЃС‚Рѕ РїСЂРёРјРµСЂ РїРѕРґРїРёСЃРєРё.
+        // РџРѕР·Р¶Рµ Р·РґРµСЃСЊ РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ РІСЃРїР»С‹РІР°СЋС‰РёРµ С†РёС„СЂС‹ СѓСЂРѕРЅР°.
+        Debug.Log($"[UIManager] РџРѕР»СѓС‡РµРЅРѕ DamageEvent: {e.SourceName} в†’ {e.TargetName} ({e.Amount})");
 }

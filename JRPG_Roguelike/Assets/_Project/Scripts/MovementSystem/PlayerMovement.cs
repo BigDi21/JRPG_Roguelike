@@ -2,15 +2,15 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Управляет перемещением игрока по сетке и его поворотами.
+/// РЈРїСЂР°РІР»СЏРµС‚ РїРµСЂРµРјРµС‰РµРЅРёРµРј РёРіСЂРѕРєР° РїРѕ СЃРµС‚РєРµ Рё РµРіРѕ РїРѕРІРѕСЂРѕС‚Р°РјРё.
 /// </summary>
 [DefaultExecutionOrder(0)]
 public class PlayerMovement : MonoBehaviour
 {
-    private const float RotationStep = 90f;
-    private const int DirectionCount = 4;
+    private const float _rotationStep = 90f;
+    private const int _directionCount = 4;
 
-    private static readonly Directions[] DirectionOrder =
+    private static readonly Directions[] _directionOrder =
     {
         Directions.North,
         Directions.East,
@@ -18,14 +18,14 @@ public class PlayerMovement : MonoBehaviour
         Directions.West
     };
 
-    [Header("Ссылки")]
+    [Header("РЎСЃС‹Р»РєРё")]
     [SerializeField] private GridManager _gridManager;
 
-    [Header("Настройки анимации")]
+    [Header("РќР°СЃС‚СЂРѕР№РєРё Р°РЅРёРјР°С†РёРё")]
     [SerializeField] private float _moveDuration = 0.2f;
     [SerializeField] private float _rotateDuration = 0.15f;
 
-    /// <summary>Идёт ли сейчас анимация перемещения.</summary>
+    /// <summary>РРґС‘С‚ Р»Рё СЃРµР№С‡Р°СЃ Р°РЅРёРјР°С†РёСЏ РїРµСЂРµРјРµС‰РµРЅРёСЏ.</summary>
     public bool IsMoving { get; private set; }
 
     private Vector2Int _currentGridPos;
@@ -34,7 +34,7 @@ public class PlayerMovement : MonoBehaviour
     private bool _isAnimating;
 
     /// <summary>
-    /// Ленивая инициализация GridManager.
+    /// Р›РµРЅРёРІР°СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ GridManager.
     /// </summary>
     private GridManager Grid => _gridManager != null ? _gridManager : (_gridManager = GridManager.Instance);
 
@@ -42,9 +42,16 @@ public class PlayerMovement : MonoBehaviour
     {
         if (Grid == null)
         {
-            Debug.LogError("[PlayerMovement] GridManager не найден!");
-            enabled = false;
-            return;
+            if (Grid == null)
+            {
+                // GridManager РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ вЂ” РІРµСЂРѕСЏС‚РЅРѕ, СЌС‚Рѕ Р±РѕРµРІР°СЏ РёР»Рё РґСЂСѓРіР°СЏ СЃС†РµРЅР°,
+                // РіРґРµ СЃРµС‚РѕС‡РЅРѕРµ РґРІРёР¶РµРЅРёРµ РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ. РћС‚РєР»СЋС‡Р°РµРјСЃСЏ Р±РµР· С€СѓРјР°.
+                Debug.LogWarning("[PlayerMovement] GridManager РЅРµ РЅР°Р№РґРµРЅ. РљРѕРјРїРѕРЅРµРЅС‚ РѕС‚РєР»СЋС‡С‘РЅ.");
+                enabled = false;
+                return;
+            }
+
+            InitializeAtStartPosition();
         }
 
         InitializeAtStartPosition();
@@ -52,15 +59,20 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        if (_isAnimating) return;
+        if (_isAnimating)
+        {
+            return;
+        }
 
         HandleInput();
 
         if (Input.GetKeyDown(KeyCode.J) && MapManager.Instance != null)
+        {
             MapManager.Instance.ToggleFog();
+        }
     }
 
-    // ======== ИНИЦИАЛИЗАЦИЯ ========
+    // ======== РРќРР¦РРђР›РР—РђР¦РРЇ ========
 
     private void InitializeAtStartPosition()
     {
@@ -74,37 +86,62 @@ public class PlayerMovement : MonoBehaviour
         }
 
         if (MapManager.Instance != null)
+        {
             MapManager.Instance.UpdateMap(_currentGridPos, _facingDirection);
+        }
     }
 
-    // ======== ВВОД ========
+    // ======== Р’Р’РћР” ========
 
     private void HandleInput()
     {
-        if (Input.GetKeyDown(KeyCode.Q)) Rotate(-RotationStep);
-        else if (Input.GetKeyDown(KeyCode.E)) Rotate(RotationStep);
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            Rotate(-_rotationStep);
+        }
+        else if (Input.GetKeyDown(KeyCode.E))
+        {
+            Rotate(_rotationStep);
+        }
 
-        if (Input.GetKeyDown(KeyCode.W)) TryMove(Directions.North);
-        else if (Input.GetKeyDown(KeyCode.S)) TryMove(Directions.South);
-        else if (Input.GetKeyDown(KeyCode.A)) TryMove(Directions.West);
-        else if (Input.GetKeyDown(KeyCode.D)) TryMove(Directions.East);
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            TryMove(Directions.North);
+        }
+        else if (Input.GetKeyDown(KeyCode.S))
+        {
+            TryMove(Directions.South);
+        }
+        else if (Input.GetKeyDown(KeyCode.A))
+        {
+            TryMove(Directions.West);
+        }
+        else if (Input.GetKeyDown(KeyCode.D))
+        {
+            TryMove(Directions.East);
+        }
     }
 
-    // ======== ПОВОРОТ ========
+    // ======== РџРћР’РћР РћРў ========
 
     private void Rotate(float angle)
     {
-        if (_isAnimating) return;
+        if (_isAnimating)
+        {
+            return;
+        }
 
-        int currentIndex = System.Array.IndexOf(DirectionOrder, _facingDirection);
-        int newIndex = (currentIndex + Mathf.RoundToInt(angle / RotationStep) + DirectionCount) % DirectionCount;
-        _facingDirection = DirectionOrder[newIndex];
+        var currentIndex = System.Array.IndexOf(_directionOrder, _facingDirection);
+        var newIndex = (currentIndex + Mathf.RoundToInt(angle / _rotationStep) + _directionCount) % _directionCount;
+        _facingDirection = _directionOrder[newIndex];
 
-        float targetAngle = newIndex * RotationStep;
+        var targetAngle = newIndex * _rotationStep;
         StartCoroutine(RotateSmoothly(targetAngle));
 
         if (MapManager.Instance != null)
+        {
             MapManager.Instance.UpdateMap(_currentGridPos, _facingDirection);
+        }
     }
 
     private IEnumerator RotateSmoothly(float targetAngle)
@@ -112,13 +149,13 @@ public class PlayerMovement : MonoBehaviour
         _isAnimating = true;
 
         Quaternion startRot = transform.rotation;
-        Quaternion endRot = Quaternion.Euler(0, targetAngle, 0);
-        float elapsed = 0f;
+        var endRot = Quaternion.Euler(0, targetAngle, 0);
+        var elapsed = 0f;
 
         while (elapsed < _rotateDuration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / _rotateDuration;
+            var t = elapsed / _rotateDuration;
             transform.rotation = Quaternion.Slerp(startRot, endRot, t);
             yield return null;
         }
@@ -127,16 +164,19 @@ public class PlayerMovement : MonoBehaviour
         _isAnimating = false;
     }
 
-    // ======== ПЕРЕМЕЩЕНИЕ ========
+    // ======== РџР•Р Р•РњР•Р©Р•РќРР• ========
 
     private void TryMove(Directions relativeDir)
     {
         Directions absoluteDir = RelativeToAbsolute(relativeDir);
-        if (absoluteDir == Directions.None) return;
+        if (absoluteDir == Directions.None)
+        {
+            return;
+        }
 
         if (_currentCell == null || !_currentCell.CanMove(absoluteDir))
         {
-            Debug.Log("[PlayerMovement] Стена!");
+            Debug.Log("[PlayerMovement] РЎС‚РµРЅР°!");
             return;
         }
 
@@ -145,13 +185,13 @@ public class PlayerMovement : MonoBehaviour
 
         if (targetCell == null)
         {
-            Debug.Log("[PlayerMovement] За пределами сетки!");
+            Debug.Log("[PlayerMovement] Р—Р° РїСЂРµРґРµР»Р°РјРё СЃРµС‚РєРё!");
             return;
         }
 
         if (targetCell.IsOccupied)
         {
-            Debug.Log("[PlayerMovement] Ячейка занята!");
+            Debug.Log("[PlayerMovement] РЇС‡РµР№РєР° Р·Р°РЅСЏС‚Р°!");
             return;
         }
 
@@ -170,7 +210,9 @@ public class PlayerMovement : MonoBehaviour
         StartCoroutine(MoveSmoothly(startPos, endPos));
 
         if (MapManager.Instance != null)
+        {
             MapManager.Instance.UpdateMap(_currentGridPos, _facingDirection);
+        }
     }
 
     private IEnumerator MoveSmoothly(Vector3 startPos, Vector3 endPos)
@@ -178,12 +220,12 @@ public class PlayerMovement : MonoBehaviour
         _isAnimating = true;
         IsMoving = true;
 
-        float elapsed = 0f;
+        var elapsed = 0f;
 
         while (elapsed < _moveDuration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / _moveDuration;
+            var t = elapsed / _moveDuration;
             transform.position = Vector3.Lerp(startPos, endPos, t);
             yield return null;
         }
@@ -193,48 +235,48 @@ public class PlayerMovement : MonoBehaviour
         IsMoving = false;
     }
 
-    // ======== НАПРАВЛЕНИЯ ========
+    // ======== РќРђРџР РђР’Р›Р•РќРРЇ ========
 
     private Directions RelativeToAbsolute(Directions relative)
     {
-        switch (relative)
+        return relative switch
         {
-            case Directions.North: return _facingDirection;
-            case Directions.South: return Opposite(_facingDirection);
-            case Directions.West: return RotateDirection(_facingDirection, -1);
-            case Directions.East: return RotateDirection(_facingDirection, 1);
-            default: return Directions.None;
-        }
+            Directions.North => _facingDirection,
+            Directions.South => Opposite(_facingDirection),
+            Directions.West => RotateDirection(_facingDirection, -1),
+            Directions.East => RotateDirection(_facingDirection, 1),
+            _ => Directions.None,
+        };
     }
 
     private Directions Opposite(Directions dir)
     {
-        switch (dir)
+        return dir switch
         {
-            case Directions.North: return Directions.South;
-            case Directions.South: return Directions.North;
-            case Directions.East: return Directions.West;
-            case Directions.West: return Directions.East;
-            default: return Directions.None;
-        }
+            Directions.North => Directions.South,
+            Directions.South => Directions.North,
+            Directions.East => Directions.West,
+            Directions.West => Directions.East,
+            _ => Directions.None,
+        };
     }
 
     private Directions RotateDirection(Directions dir, int steps)
     {
-        int idx = System.Array.IndexOf(DirectionOrder, dir);
-        int newIdx = (idx + steps + DirectionCount) % DirectionCount;
-        return DirectionOrder[newIdx];
+        var idx = System.Array.IndexOf(_directionOrder, dir);
+        var newIdx = (idx + steps + _directionCount) % _directionCount;
+        return _directionOrder[newIdx];
     }
 
     private Vector2Int GetOffset(Directions dir)
     {
-        switch (dir)
+        return dir switch
         {
-            case Directions.North: return Vector2Int.up;
-            case Directions.South: return Vector2Int.down;
-            case Directions.East: return Vector2Int.right;
-            case Directions.West: return Vector2Int.left;
-            default: return Vector2Int.zero;
-        }
+            Directions.North => Vector2Int.up,
+            Directions.South => Vector2Int.down,
+            Directions.East => Vector2Int.right,
+            Directions.West => Vector2Int.left,
+            _ => Vector2Int.zero,
+        };
     }
 }

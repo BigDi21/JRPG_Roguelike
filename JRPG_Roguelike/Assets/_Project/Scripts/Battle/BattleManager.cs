@@ -4,13 +4,13 @@ using SimpleJRPG;
 using UnityEngine;
 
 /// <summary>
-/// Управляет ходом боя: инициализацией, очерёдностью, действиями игрока и врага.
+/// РЈРїСЂР°РІР»СЏРµС‚ С…РѕРґРѕРј Р±РѕСЏ: РёРЅРёС†РёР°Р»РёР·Р°С†РёРµР№, РѕС‡РµСЂС‘РґРЅРѕСЃС‚СЊСЋ, РґРµР№СЃС‚РІРёСЏРјРё РёРіСЂРѕРєР° Рё РІСЂР°РіР°.
 /// </summary>
 public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance { get; private set; }
 
-    [Header("Ссылки на бойцов")]
+    [Header("РЎСЃС‹Р»РєРё РЅР° Р±РѕР№С†РѕРІ")]
     [SerializeField] private GameObject _playerGO;
     [SerializeField] private GameObject _enemyGO;
 
@@ -40,7 +40,6 @@ public class BattleManager : MonoBehaviour
     {
         if (_playerGO == null || _enemyGO == null)
         {
-            Debug.LogError("[BattleManager] Не найдены объекты Player или Enemy на сцене!");
             return;
         }
 
@@ -48,20 +47,20 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Начинает бой между игроком и врагом.
+    /// РќР°С‡РёРЅР°РµС‚ Р±РѕР№ РјРµР¶РґСѓ РёРіСЂРѕРєРѕРј Рё РІСЂР°РіРѕРј.
     /// </summary>
-    /// <param name="playerGO">GameObject игрока.</param>
-    /// <param name="enemyGO">GameObject врага.</param>
+    /// <param name="playerGO">GameObject РёРіСЂРѕРєР°.</param>
+    /// <param name="enemyGO">GameObject РІСЂР°РіР°.</param>
     public void StartBattle(GameObject playerGO, GameObject enemyGO)
     {
+        Debug.Log("[BattleManager] StartBattle РІС‹Р·РІР°РЅ");
         if (IsBattleActive)
         {
-            Debug.LogWarning("[BattleManager] Бой уже идёт!");
             return;
         }
 
-        _player = new PlayerCombatant(playerGO, "Герой", 0);
-        _enemy = new EnemyCombatant(enemyGO, "Гоблин", 1);
+        _player = new PlayerCombatant(playerGO, "Р“РµСЂРѕР№", 0);
+        _enemy = new EnemyCombatant(enemyGO, "Р“РѕР±Р»РёРЅ", 1);
 
         UIManager.Instance.Initialize(
             _player.HealthComponent,
@@ -86,11 +85,11 @@ public class BattleManager : MonoBehaviour
         _battle.BeginNextTurn();
     }
 
-    // ======== ОБРАБОТЧИКИ СОБЫТИЙ ========
+    // ======== РћР‘Р РђР‘РћРўР§РРљР РЎРћР‘Р«РўРР™ ========
 
     private void HandleTurnStart(TurnEvent e)
     {
-        var actor = e.Actor;
+        ICombatant actor = e.Actor;
 
         if (actor == _player)
         {
@@ -100,7 +99,7 @@ public class BattleManager : MonoBehaviour
 
         if (actor is EnemyCombatant enemy && _player.IsAlive)
         {
-            int damage = enemy.StatsComponent.Strength + Random.Range(0, 5);
+            var damage = enemy.StatsComponent.Strength + Random.Range(0, 5);
             _battle.DealDamage(enemy, _player, damage);
             _battle.EndTurn();
         }
@@ -108,18 +107,31 @@ public class BattleManager : MonoBehaviour
 
     private void HandleDamageDealt(DamageEvent e)
     {
+        // РџСЂСЏРјР°СЏ СЃСЃС‹Р»РєР° РЅР° UI РѕСЃС‚Р°С‘С‚СЃСЏ, РЅРѕ РїР°СЂР°Р»Р»РµР»СЊРЅРѕ РїРѕРґРЅРёРјР°РµРј СЃРѕР±С‹С‚РёРµ
         UIManager.Instance.ShowMessage(
-            $"{e.Source.Name} нанёс {e.Amount} урона {e.Target.Name}!");
+            $"{e.Source.Name} РЅР°РЅС‘СЃ {e.Amount} СѓСЂРѕРЅР° {e.Target.Name}!");
+
+        // РџРѕРґРЅРёРјР°РµРј СЃРѕР±С‹С‚РёРµ РґР»СЏ РґСЂСѓРіРёС… СЃРёСЃС‚РµРј (РЅР°РїСЂРёРјРµСЂ, Р±СѓРґСѓС‰РёС… VFX)
+        EventBus.Raise(new GameEvents.DamageEvent
+        {
+            SourceName = e.Source.Name,
+            TargetName = e.Target.Name,
+            Amount = e.Amount
+        });
     }
 
     private void HandleKO(KOEvent e)
     {
-        UIManager.Instance.ShowMessage($"{e.Target.Name} повержен!");
+        UIManager.Instance.ShowMessage($"{e.Target.Name} РїРѕРІРµСЂР¶РµРЅ!");
 
         if (!_player.IsAlive)
+        {
             _battle.EndBattle(BattleState.Defeat);
+        }
         else if (!_enemy.IsAlive)
+        {
             _battle.EndBattle(BattleState.Victory);
+        }
     }
 
     private void HandleBattleEnd(Battle battle, BattleState state)
@@ -133,75 +145,107 @@ public class BattleManager : MonoBehaviour
         _battle.OnBattleEnd -= HandleBattleEnd;
     }
 
-    // ======== ДЕЙСТВИЯ ИГРОКА ========
+    // ======== Р”Р•Р™РЎРўР’РРЇ РР“Р РћРљРђ ========
 
-    /// <summary>Игрок выполняет базовую атаку.</summary>
+    /// <summary>РРіСЂРѕРє РІС‹РїРѕР»РЅСЏРµС‚ Р±Р°Р·РѕРІСѓСЋ Р°С‚Р°РєСѓ.</summary>
     public void PlayerAttack()
     {
-        if (!IsBattleActive) return;
+        if (!IsBattleActive)
+        {
+            return;
+        }
 
-        int damage = _player.StatsComponent.Strength + Random.Range(0, 5);
+        var damage = _player.StatsComponent.Strength + Random.Range(0, 5);
         _battle.DealDamage(_player, _enemy, damage);
         _battle.EndTurn();
 
-        TryStartNextTurn("атака");
+        TryStartNextTurn("Р°С‚Р°РєР°");
     }
 
-    /// <summary>Игрок защищается (пропускает ход).</summary>
+    /// <summary>РРіСЂРѕРє Р·Р°С‰РёС‰Р°РµС‚СЃСЏ (РїСЂРѕРїСѓСЃРєР°РµС‚ С…РѕРґ).</summary>
     public void PlayerDefend()
     {
-        if (!IsBattleActive) return;
+        if (!IsBattleActive)
+        {
+            return;
+        }
 
-        UIManager.Instance.ShowMessage("Герой защищается!");
+        UIManager.Instance.ShowMessage("Р“РµСЂРѕР№ Р·Р°С‰РёС‰Р°РµС‚СЃСЏ!");
         _battle.EndTurn();
 
-        TryStartNextTurn("защита");
+        TryStartNextTurn("Р·Р°С‰РёС‚Р°");
     }
 
-    /// <summary>Игрок использует предмет из инвентаря.</summary>
-    /// <param name="item">Используемый предмет.</param>
+    /// <summary>РРіСЂРѕРє РёСЃРїРѕР»СЊР·СѓРµС‚ РїСЂРµРґРјРµС‚ РёР· РёРЅРІРµРЅС‚Р°СЂСЏ.</summary>
+    /// <param name="item">РСЃРїРѕР»СЊР·СѓРµРјС‹Р№ РїСЂРµРґРјРµС‚.</param>
     public void PlayerUseItem(ItemData item)
     {
-        if (!IsBattleActive) return;
-        if (item == null) return;
-        if (!_player.InventoryComponent.Items.Contains(item)) return;
+        if (!IsBattleActive)
+        {
+            return;
+        }
+
+        if (item == null)
+        {
+            return;
+        }
+
+        if (!_player.InventoryComponent.Items.Contains(item))
+        {
+            return;
+        }
 
         if (!TryApplyEffect(item.Effect, _player))
+        {
             return;
+        }
 
         _player.InventoryComponent.RemoveItem(item);
         _battle.EndTurn();
 
-        TryStartNextTurn("предмет");
+        TryStartNextTurn("РїСЂРµРґРјРµС‚");
     }
 
-    /// <summary>Игрок применяет заклинание.</summary>
-    /// <param name="spell">Применяемое заклинание.</param>
+    /// <summary>РРіСЂРѕРє РїСЂРёРјРµРЅСЏРµС‚ Р·Р°РєР»РёРЅР°РЅРёРµ.</summary>
+    /// <param name="spell">РџСЂРёРјРµРЅСЏРµРјРѕРµ Р·Р°РєР»РёРЅР°РЅРёРµ.</param>
     public void PlayerCastSpell(SpellData spell)
     {
-        if (!IsBattleActive) return;
-        if (spell == null) return;
-        if (!_player.SpellManagerComponent.Spells.Contains(spell)) return;
+        if (!IsBattleActive)
+        {
+            return;
+        }
+
+        if (spell == null)
+        {
+            return;
+        }
+
+        if (!_player.SpellManagerComponent.Spells.Contains(spell))
+        {
+            return;
+        }
 
         if (_player.Mana < spell.ManaCost)
         {
-            UIManager.Instance.ShowMessage("Недостаточно маны!");
+            UIManager.Instance.ShowMessage("РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РјР°РЅС‹!");
             return;
         }
 
         if (!TryApplyEffect(spell.Effect, _player))
+        {
             return;
+        }
 
         _player.UseMana(spell.ManaCost);
         _battle.EndTurn();
 
-        TryStartNextTurn("заклинание");
+        TryStartNextTurn("Р·Р°РєР»РёРЅР°РЅРёРµ");
     }
 
-    // ======== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ========
+    // ======== Р’РЎРџРћРњРћР“РђРўР•Р›Р¬РќР«Р• РњР•РўРћР”Р« ========
 
     /// <summary>
-    /// Определяет цель для эффекта. Возвращает null для массовых эффектов.
+    /// РћРїСЂРµРґРµР»СЏРµС‚ С†РµР»СЊ РґР»СЏ СЌС„С„РµРєС‚Р°. Р’РѕР·РІСЂР°С‰Р°РµС‚ null РґР»СЏ РјР°СЃСЃРѕРІС‹С… СЌС„С„РµРєС‚РѕРІ.
     /// </summary>
     private ICombatant GetTarget(Effect effect, ICombatant caster)
     {
@@ -217,12 +261,12 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Применяет эффект к цели (или ко всем, если эффект массовый).
-    /// Возвращает false, если не удалось подобрать цель.
+    /// РџСЂРёРјРµРЅСЏРµС‚ СЌС„С„РµРєС‚ Рє С†РµР»Рё (РёР»Рё РєРѕ РІСЃРµРј, РµСЃР»Рё СЌС„С„РµРєС‚ РјР°СЃСЃРѕРІС‹Р№).
+    /// Р’РѕР·РІСЂР°С‰Р°РµС‚ false, РµСЃР»Рё РЅРµ СѓРґР°Р»РѕСЃСЊ РїРѕРґРѕР±СЂР°С‚СЊ С†РµР»СЊ.
     /// </summary>
     private bool TryApplyEffect(Effect effect, ICombatant caster)
     {
-        var target = GetTarget(effect, caster);
+        ICombatant target = GetTarget(effect, caster);
 
         if (target != null)
         {
@@ -233,30 +277,39 @@ public class BattleManager : MonoBehaviour
         switch (effect.TargetType)
         {
             case TargetType.All:
-                foreach (var ally in _allies)
+                foreach (ICombatant ally in _allies)
+                {
                     effect.Apply(caster, ally);
+                }
+
                 return true;
 
             case TargetType.AllEnemies:
-                foreach (var enemy in _enemies)
+                foreach (ICombatant enemy in _enemies)
+                {
                     effect.Apply(caster, enemy);
+                }
+
                 return true;
 
             default:
-                Debug.LogWarning("[BattleManager] Не удалось выбрать цель для эффекта!");
+                Debug.LogWarning("[BattleManager] РќРµ СѓРґР°Р»РѕСЃСЊ РІС‹Р±СЂР°С‚СЊ С†РµР»СЊ РґР»СЏ СЌС„С„РµРєС‚Р°!");
                 return false;
         }
     }
 
     /// <summary>
-    /// Запускает следующий ход, если бой ждёт команды игрока.
+    /// Р—Р°РїСѓСЃРєР°РµС‚ СЃР»РµРґСѓСЋС‰РёР№ С…РѕРґ, РµСЃР»Рё Р±РѕР№ Р¶РґС‘С‚ РєРѕРјР°РЅРґС‹ РёРіСЂРѕРєР°.
     /// </summary>
-    /// <param name="actionName">Название действия (для лога).</param>
+    /// <param name="actionName">РќР°Р·РІР°РЅРёРµ РґРµР№СЃС‚РІРёСЏ (РґР»СЏ Р»РѕРіР°).</param>
     private void TryStartNextTurn(string actionName)
     {
-        if (_battle.State != BattleState.WaitingForCommands) return;
+        if (_battle.State != BattleState.WaitingForCommands)
+        {
+            return;
+        }
 
-        Debug.Log($"[BattleManager] Запускаем следующий ход ({actionName}).");
+        Debug.Log($"[BattleManager] Р—Р°РїСѓСЃРєР°РµРј СЃР»РµРґСѓСЋС‰РёР№ С…РѕРґ ({actionName}).");
         _battle.BeginNextTurn();
     }
 }
