@@ -5,7 +5,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Управляет боевым UI: панелями действий, инвентарём, заклинаниями, полосами HP/маны и сообщениями.
+/// Управляет боевым UI: панелями действий, инвентарём, заклинаниями,
+/// полосами HP/маны и сообщениями. Подписан на события EventBus.
 /// </summary>
 public class UIManager : MonoBehaviour
 {
@@ -39,6 +40,8 @@ public class UIManager : MonoBehaviour
     private InventoryComponent _playerInventory;
     private SpellManagerComponent _playerSpells;
 
+    // ======== ЖИЗНЕННЫЙ ЦИКЛ ========
+
     private void Awake()
     {
         if (Instance == null)
@@ -51,6 +54,24 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        EventBus.Subscribe<GameEvents.DamageEvent>(OnDamageEvent);
+        EventBus.Subscribe<GameEvents.KOEvent>(OnKOEvent);
+        EventBus.Subscribe<GameEvents.BattleEndEvent>(OnBattleEndEvent);
+        EventBus.Subscribe<GameEvents.ShowMessageEvent>(OnShowMessage);
+        EventBus.Subscribe<GameEvents.ShowActionPanelEvent>(OnShowActionPanel);
+    }
+
+    private void OnDisable()
+    {
+        EventBus.Unsubscribe<GameEvents.DamageEvent>(OnDamageEvent);
+        EventBus.Unsubscribe<GameEvents.KOEvent>(OnKOEvent);
+        EventBus.Unsubscribe<GameEvents.BattleEndEvent>(OnBattleEndEvent);
+        EventBus.Unsubscribe<GameEvents.ShowMessageEvent>(OnShowMessage);
+        EventBus.Unsubscribe<GameEvents.ShowActionPanelEvent>(OnShowActionPanel);
+    }
+
     private void Start()
     {
         SetPanelsActive(false, false, false);
@@ -58,6 +79,16 @@ public class UIManager : MonoBehaviour
         if (_messageText != null)
         {
             _messageText.text = string.Empty;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        UnsubscribeFromHealthEvents();
+
+        if (Instance == this)
+        {
+            Instance = null;
         }
     }
 
@@ -113,17 +144,19 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
-    {
-        UnsubscribeFromHealthEvents();
-
-        if (Instance == this)
-        {
-            Instance = null;
-        }
-    }
-
     private void OnHealthChanged(int current, int max) => UpdateHealthUI();
+
+    // ======== ОБРАБОТЧИКИ СОБЫТИЙ EVENTBUS ========
+
+    private void OnDamageEvent(GameEvents.DamageEvent e) => ShowMessage($"{e.SourceName} нанёс {e.Amount} урона {e.TargetName}!");
+
+    private void OnKOEvent(GameEvents.KOEvent e) => ShowMessage($"{e.TargetName} повержен!");
+
+    private void OnBattleEndEvent(GameEvents.BattleEndEvent e) => ShowBattleResult(e.State);
+
+    private void OnShowMessage(GameEvents.ShowMessageEvent e) => ShowMessage(e.Text);
+
+    private void OnShowActionPanel(GameEvents.ShowActionPanelEvent e) => ShowActionPanel();
 
     // ======== ОБНОВЛЕНИЕ UI ========
 
@@ -143,7 +176,7 @@ public class UIManager : MonoBehaviour
             return;
         }
 
-        if (_playerHealthSlider != null)
+        if (_playerHealthSlider != null && _playerHealth.MaxHealth > 0)
         {
             _playerHealthSlider.value = (float)_playerHealth.CurrentHealth / _playerHealth.MaxHealth;
         }
@@ -161,7 +194,7 @@ public class UIManager : MonoBehaviour
             return;
         }
 
-        if (_enemyHealthSlider != null)
+        if (_enemyHealthSlider != null && _enemyHealth.MaxHealth > 0)
         {
             _enemyHealthSlider.value = (float)_enemyHealth.CurrentHealth / _enemyHealth.MaxHealth;
         }
@@ -182,7 +215,7 @@ public class UIManager : MonoBehaviour
             return;
         }
 
-        if (_playerManaSlider != null)
+        if (_playerManaSlider != null && _playerStats.MaxMana > 0)
         {
             _playerManaSlider.value = (float)_playerStats.Mana / _playerStats.MaxMana;
         }
@@ -207,6 +240,11 @@ public class UIManager : MonoBehaviour
         foreach (ItemData item in _playerInventory.Items)
         {
             Button button = CreateButton(_itemButtonPrefab, _inventoryContent);
+            if (button == null)
+            {
+                continue;
+            }
+
             SetButtonText(button, item.ItemName);
             button.onClick.AddListener(() => BattleManager.Instance.PlayerUseItem(item));
         }
@@ -224,12 +262,21 @@ public class UIManager : MonoBehaviour
         foreach (SpellData spell in _playerSpells.Spells)
         {
             Button button = CreateButton(_spellButtonPrefab, _spellContent);
+            if (button == null)
+            {
+                continue;
+            }
+
             SetButtonText(button, $"{spell.SpellName} (MP: {spell.ManaCost})");
             button.onClick.AddListener(() => BattleManager.Instance.PlayerCastSpell(spell));
         }
     }
 
-    private static Button CreateButton(GameObject prefab, Transform parent) => Instantiate(prefab, parent).GetComponent<Button>();
+    private static Button CreateButton(GameObject prefab, Transform parent)
+    {
+        GameObject instance = Instantiate(prefab, parent);
+        return instance.GetComponent<Button>();
+    }
 
     private static void SetButtonText(Button button, string text)
     {
@@ -331,7 +378,12 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void ShowBattleResult(BattleState state)
     {
-        var result = state == BattleState.Victory ? "Победа!" : "Поражение...";
+        var result = state switch
+        {
+            BattleState.Victory => "Победа!",
+            BattleState.Defeat => "Поражение...",
+            _ => string.Empty
+        };
 
         if (_messageText != null)
         {
@@ -371,13 +423,4 @@ public class UIManager : MonoBehaviour
             _spellPanel.SetActive(spells);
         }
     }
-
-    private void OnEnable() => EventBus.Subscribe<GameEvents.DamageEvent>(OnDamageEvent);
-
-    private void OnDisable() => EventBus.Unsubscribe<GameEvents.DamageEvent>(OnDamageEvent);
-
-    private void OnDamageEvent(GameEvents.DamageEvent e) =>
-        // Пока ничего не делаем — просто пример подписки.
-        // Позже здесь можно добавить всплывающие цифры урона.
-        Debug.Log($"[UIManager] Получено DamageEvent: {e.SourceName} → {e.TargetName} ({e.Amount})");
 }

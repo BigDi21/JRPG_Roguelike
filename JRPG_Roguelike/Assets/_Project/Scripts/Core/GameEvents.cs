@@ -1,3 +1,5 @@
+using SimpleJRPG;
+
 /// <summary>
 /// Все события игры. Структуры, передаваемые через EventBus.
 /// </summary>
@@ -40,7 +42,18 @@ public static class GameEvents
     /// <summary>Бой завершён.</summary>
     public struct BattleEndEvent
     {
-        public bool IsVictory;
+        public BattleState State;
+    }
+
+    /// <summary>Запрос на показ панели действий игрока.</summary>
+    public struct ShowActionPanelEvent
+    {
+    }
+
+    /// <summary>Запрос на показ произвольного сообщения в UI.</summary>
+    public struct ShowMessageEvent
+    {
+        public string Text;
     }
 
     // ======== ПРОГРЕССИЯ ========
@@ -65,6 +78,7 @@ public static class GameEvents
     {
         public int GridX;
         public int GridY;
+        public Directions FacingDirection;
     }
 
     /// <summary>Игрок погиб.</summary>

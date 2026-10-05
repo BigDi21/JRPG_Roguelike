@@ -93,7 +93,7 @@ public class BattleManager : MonoBehaviour
 
         if (actor == _player)
         {
-            UIManager.Instance.ShowActionPanel();
+            EventBus.Raise(new GameEvents.ShowActionPanelEvent());
             return;
         }
 
@@ -107,10 +107,6 @@ public class BattleManager : MonoBehaviour
 
     private void HandleDamageDealt(DamageEvent e)
     {
-        // Прямая ссылка на UI остаётся, но параллельно поднимаем событие
-        UIManager.Instance.ShowMessage(
-            $"{e.Source.Name} нанёс {e.Amount} урона {e.Target.Name}!");
-
         // Поднимаем событие для других систем (например, будущих VFX)
         EventBus.Raise(new GameEvents.DamageEvent
         {
@@ -122,7 +118,11 @@ public class BattleManager : MonoBehaviour
 
     private void HandleKO(KOEvent e)
     {
-        UIManager.Instance.ShowMessage($"{e.Target.Name} повержен!");
+        EventBus.Raise(new GameEvents.KOEvent
+        {
+            TargetName = e.Target.Name,
+            IsPlayer = e.Target == _player
+        });
 
         if (!_player.IsAlive)
         {
@@ -137,7 +137,11 @@ public class BattleManager : MonoBehaviour
     private void HandleBattleEnd(Battle battle, BattleState state)
     {
         IsBattleActive = false;
-        UIManager.Instance.ShowBattleResult(state);
+
+        EventBus.Raise(new GameEvents.BattleEndEvent
+        {
+            State = state
+        });
 
         _battle.OnTurnStart -= HandleTurnStart;
         _battle.OnDamageDealt -= HandleDamageDealt;
@@ -170,10 +174,15 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        UIManager.Instance.ShowMessage("Герой защищается!");
+        EventBus.Raise(new GameEvents.ShowMessageEvent
+        {
+            Text = "Герой защищается!"
+        });
+
         _battle.EndTurn();
 
         TryStartNextTurn("защита");
+
     }
 
     /// <summary>Игрок использует предмет из инвентаря.</summary>
@@ -227,7 +236,10 @@ public class BattleManager : MonoBehaviour
 
         if (_player.Mana < spell.ManaCost)
         {
-            UIManager.Instance.ShowMessage("Недостаточно маны!");
+            EventBus.Raise(new GameEvents.ShowMessageEvent
+            {
+                Text = "Недостаточно маны!"
+            });
             return;
         }
 
