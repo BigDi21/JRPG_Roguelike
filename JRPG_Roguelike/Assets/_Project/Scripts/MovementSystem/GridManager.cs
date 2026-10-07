@@ -2,20 +2,22 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Управляет сеткой уровня: генерацией лабиринта, хранением клеток, визуализацией и туманом войны.
+/// РЈРїСЂР°РІР»СЏРµС‚ СЃРµС‚РєРѕР№ СѓСЂРѕРІРЅСЏ: РіРµРЅРµСЂР°С†РёРµР№ Р»Р°Р±РёСЂРёРЅС‚Р°, С…СЂР°РЅРµРЅРёРµРј РєР»РµС‚РѕРє, РІРёР·СѓР°Р»РёР·Р°С†РёРµР№ Рё С‚СѓРјР°РЅРѕРј РІРѕР№РЅС‹.
 /// </summary>
+
+[DefaultExecutionOrder(-100)]
 public class GridManager : MonoBehaviour
 {
     public static GridManager Instance { get; private set; }
 
-    [Header("Размеры сетки")]
+    [Header("Р Р°Р·РјРµСЂС‹ СЃРµС‚РєРё")]
     [SerializeField] private int _width = 20;
     [SerializeField] private int _height = 20;
 
-    [Header("Размер ячейки")]
+    [Header("Р Р°Р·РјРµСЂ СЏС‡РµР№РєРё")]
     [SerializeField] private float _cellSize = 10f;
 
-    [Header("Префабы")]
+    [Header("РџСЂРµС„Р°Р±С‹")]
     [SerializeField] private GameObject _cellPrefab;
     [SerializeField] private GameObject _startMarker;
     [SerializeField] private GameObject _finishMarker;
@@ -23,22 +25,22 @@ public class GridManager : MonoBehaviour
     private Cell[,] _grid;
     private Dictionary<Vector2Int, Cell> _cellMap;
 
-    /// <summary>Ширина сетки в клетках.</summary>
+    /// <summary>РЁРёСЂРёРЅР° СЃРµС‚РєРё РІ РєР»РµС‚РєР°С….</summary>
     public int Width => _width;
 
-    /// <summary>Высота сетки в клетках.</summary>
+    /// <summary>Р’С‹СЃРѕС‚Р° СЃРµС‚РєРё РІ РєР»РµС‚РєР°С….</summary>
     public int Height => _height;
 
-    /// <summary>Размер одной клетки в мировых единицах.</summary>
+    /// <summary>Р Р°Р·РјРµСЂ РѕРґРЅРѕР№ РєР»РµС‚РєРё РІ РјРёСЂРѕРІС‹С… РµРґРёРЅРёС†Р°С….</summary>
     public float CellSize => _cellSize;
 
-    /// <summary>Двумерный массив клеток.</summary>
+    /// <summary>Р”РІСѓРјРµСЂРЅС‹Р№ РјР°СЃСЃРёРІ РєР»РµС‚РѕРє.</summary>
     public Cell[,] Grid => _grid;
 
-    /// <summary>Стартовая позиция игрока на сетке.</summary>
+    /// <summary>РЎС‚Р°СЂС‚РѕРІР°СЏ РїРѕР·РёС†РёСЏ РёРіСЂРѕРєР° РЅР° СЃРµС‚РєРµ.</summary>
     public Vector2Int StartPosition { get; private set; }
 
-    /// <summary>Позиция выхода (финиша) на сетке.</summary>
+    /// <summary>РџРѕР·РёС†РёСЏ РІС‹С…РѕРґР° (С„РёРЅРёС€Р°) РЅР° СЃРµС‚РєРµ.</summary>
     public Vector2Int FinishPosition { get; private set; }
 
     private void Awake()
@@ -57,18 +59,15 @@ public class GridManager : MonoBehaviour
         PlaceStartAndFinish();
     }
 
-    private void Start()
-    {
-        CreateVisuals();
-    }
+    private void Start() => CreateVisuals();
 
-    // ======== ГЕНЕРАЦИЯ ========
+    // ======== Р“Р•РќР•Р РђР¦РРЇ ========
 
     /// <summary>
-    /// Генерирует новую сетку указанного размера с помощью DFS-лабиринта.
+    /// Р“РµРЅРµСЂРёСЂСѓРµС‚ РЅРѕРІСѓСЋ СЃРµС‚РєСѓ СѓРєР°Р·Р°РЅРЅРѕРіРѕ СЂР°Р·РјРµСЂР° СЃ РїРѕРјРѕС‰СЊСЋ DFS-Р»Р°Р±РёСЂРёРЅС‚Р°.
     /// </summary>
-    /// <param name="width">Ширина сетки.</param>
-    /// <param name="height">Высота сетки.</param>
+    /// <param name="width">РЁРёСЂРёРЅР° СЃРµС‚РєРё.</param>
+    /// <param name="height">Р’С‹СЃРѕС‚Р° СЃРµС‚РєРё.</param>
     public void GenerateGrid(int width, int height)
     {
         _width = width;
@@ -83,9 +82,9 @@ public class GridManager : MonoBehaviour
 
     private void CreateEmptyCells()
     {
-        for (int x = 0; x < _width; x++)
+        for (var x = 0; x < _width; x++)
         {
-            for (int y = 0; y < _height; y++)
+            for (var y = 0; y < _height; y++)
             {
                 var pos = new Vector2Int(x, y);
                 var cell = new Cell(pos);
@@ -99,14 +98,14 @@ public class GridManager : MonoBehaviour
     {
         var visited = new bool[_width, _height];
         var stack = new Stack<Vector2Int>();
-        Vector2Int start = new Vector2Int(0, 0);
+        var start = new Vector2Int(0, 0);
         visited[start.x, start.y] = true;
         stack.Push(start);
 
         while (stack.Count > 0)
         {
             Vector2Int current = stack.Peek();
-            var neighbors = GetUnvisitedNeighbors(current, visited);
+            List<Vector2Int> neighbors = GetUnvisitedNeighbors(current, visited);
 
             if (neighbors.Count > 0)
             {
@@ -124,9 +123,9 @@ public class GridManager : MonoBehaviour
 
     private void EnsureNoIsolatedCells()
     {
-        for (int x = 0; x < _width; x++)
+        for (var x = 0; x < _width; x++)
         {
-            for (int y = 0; y < _height; y++)
+            for (var y = 0; y < _height; y++)
             {
                 if (_grid[x, y].Connections == Directions.None && (x != 0 || y != 0))
                 {
@@ -141,11 +140,13 @@ public class GridManager : MonoBehaviour
         var result = new List<Vector2Int>();
         Vector2Int[] dirs = { Vector2Int.up, Vector2Int.right, Vector2Int.down, Vector2Int.left };
 
-        foreach (var dir in dirs)
+        foreach (Vector2Int dir in dirs)
         {
             Vector2Int neighbor = pos + dir;
             if (IsInBounds(neighbor) && !visited[neighbor.x, neighbor.y])
+            {
                 result.Add(neighbor);
+            }
         }
 
         return result;
@@ -153,8 +154,8 @@ public class GridManager : MonoBehaviour
 
     private void RemoveWall(Vector2Int a, Vector2Int b)
     {
-        var cellA = _grid[a.x, a.y];
-        var cellB = _grid[b.x, b.y];
+        Cell cellA = _grid[a.x, a.y];
+        Cell cellB = _grid[b.x, b.y];
         Vector2Int diff = b - a;
 
         if (diff == Vector2Int.up)
@@ -181,7 +182,7 @@ public class GridManager : MonoBehaviour
 
     private void ForceConnect(Cell cell)
     {
-        var pos = cell.Position;
+        Vector2Int pos = cell.Position;
         var neighbors = new List<Vector2Int>
         {
             pos + Vector2Int.up,
@@ -190,7 +191,7 @@ public class GridManager : MonoBehaviour
             pos + Vector2Int.left
         };
 
-        foreach (var neighborPos in neighbors)
+        foreach (Vector2Int neighborPos in neighbors)
         {
             if (IsInBounds(neighborPos))
             {
@@ -200,10 +201,7 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    private bool IsInBounds(Vector2Int pos)
-    {
-        return pos.x >= 0 && pos.x < _width && pos.y >= 0 && pos.y < _height;
-    }
+    private bool IsInBounds(Vector2Int pos) => pos.x >= 0 && pos.x < _width && pos.y >= 0 && pos.y < _height;
 
     private void PlaceStartAndFinish()
     {
@@ -211,25 +209,29 @@ public class GridManager : MonoBehaviour
         FinishPosition = new Vector2Int(0, _height - 1);
     }
 
-    // ======== ВИЗУАЛИЗАЦИЯ ========
+    // ======== Р’РР—РЈРђР›РР—РђР¦РРЇ ========
 
     private void CreateVisuals()
     {
-        if (_cellPrefab == null) return;
-
-        float offsetX = (_width - 1) * _cellSize * 0.5f;
-        float offsetZ = (_height - 1) * _cellSize * 0.5f;
-
-        for (int x = 0; x < _width; x++)
+        if (_cellPrefab == null)
         {
-            for (int y = 0; y < _height; y++)
-            {
-                Vector3 pos = new Vector3(x * _cellSize - offsetX, 0, y * _cellSize - offsetZ);
-                var go = Instantiate(_cellPrefab, pos, Quaternion.identity, transform);
-                var visual = go.GetComponent<CellVisual>();
+            return;
+        }
 
-                if (visual != null)
+        var offsetX = (_width - 1) * _cellSize * 0.5f;
+        var offsetZ = (_height - 1) * _cellSize * 0.5f;
+
+        for (var x = 0; x < _width; x++)
+        {
+            for (var y = 0; y < _height; y++)
+            {
+                var pos = new Vector3(x * _cellSize - offsetX, 0, y * _cellSize - offsetZ);
+                GameObject go = Instantiate(_cellPrefab, pos, Quaternion.identity, transform);
+                
+                if (go.TryGetComponent<CellVisual>(out CellVisual visual))
+                {
                     visual.Initialize(_grid[x, y]);
+                }
             }
         }
 
@@ -239,60 +241,66 @@ public class GridManager : MonoBehaviour
 
     private void SpawnMarker(GameObject marker, Vector2Int gridPos, float offsetX, float offsetZ)
     {
-        if (marker == null) return;
+        if (marker == null)
+        {
+            return;
+        }
 
-        Vector3 pos = new Vector3(gridPos.x * _cellSize - offsetX, 0, gridPos.y * _cellSize - offsetZ);
+        var pos = new Vector3(gridPos.x * _cellSize - offsetX, 0, gridPos.y * _cellSize - offsetZ);
         Instantiate(marker, pos, Quaternion.identity);
     }
 
-    // ======== ПУБЛИЧНЫЙ API ========
+    // ======== РџРЈР‘Р›РР§РќР«Р™ API ========
 
     /// <summary>
-    /// Возвращает клетку по указанной позиции. null, если позиция вне сетки.
+    /// Р’РѕР·РІСЂР°С‰Р°РµС‚ РєР»РµС‚РєСѓ РїРѕ СѓРєР°Р·Р°РЅРЅРѕР№ РїРѕР·РёС†РёРё. null, РµСЃР»Рё РїРѕР·РёС†РёСЏ РІРЅРµ СЃРµС‚РєРё.
     /// </summary>
-    public Cell GetCell(Vector2Int pos)
-    {
-        return _cellMap.TryGetValue(pos, out var cell) ? cell : null;
-    }
+    public Cell GetCell(Vector2Int pos) => _cellMap.TryGetValue(pos, out Cell cell) ? cell : null;
 
     /// <summary>
-    /// Возвращает клетку по координатам X и Y.
+    /// Р’РѕР·РІСЂР°С‰Р°РµС‚ РєР»РµС‚РєСѓ РїРѕ РєРѕРѕСЂРґРёРЅР°С‚Р°Рј X Рё Y.
     /// </summary>
-    public Cell GetCell(int x, int y)
-    {
-        return GetCell(new Vector2Int(x, y));
-    }
+    public Cell GetCell(int x, int y) => GetCell(new Vector2Int(x, y));
 
     /// <summary>
-    /// Возвращает мировую позицию для указанной клетки.
+    /// Р’РѕР·РІСЂР°С‰Р°РµС‚ РјРёСЂРѕРІСѓСЋ РїРѕР·РёС†РёСЋ РґР»СЏ СѓРєР°Р·Р°РЅРЅРѕР№ РєР»РµС‚РєРё.
     /// </summary>
     public Vector3 GetWorldPosition(Vector2Int gridPos)
     {
-        float offsetX = (_width - 1) * _cellSize * 0.5f;
-        float offsetZ = (_height - 1) * _cellSize * 0.5f;
+        var offsetX = (_width - 1) * _cellSize * 0.5f;
+        var offsetZ = (_height - 1) * _cellSize * 0.5f;
         return new Vector3(gridPos.x * _cellSize - offsetX, 0, gridPos.y * _cellSize - offsetZ);
     }
 
     /// <summary>
-    /// Открывает область вокруг стартовой позиции в указанном направлении.
+    /// РћС‚РєСЂС‹РІР°РµС‚ РѕР±Р»Р°СЃС‚СЊ РІРѕРєСЂСѓРі СЃС‚Р°СЂС‚РѕРІРѕР№ РїРѕР·РёС†РёРё РІ СѓРєР°Р·Р°РЅРЅРѕРј РЅР°РїСЂР°РІР»РµРЅРёРё.
     /// </summary>
-    /// <param name="start">Стартовая позиция.</param>
-    /// <param name="direction">Направление обзора.</param>
-    /// <param name="range">Радиус обзора в клетках.</param>
+    /// <param name="start">РЎС‚Р°СЂС‚РѕРІР°СЏ РїРѕР·РёС†РёСЏ.</param>
+    /// <param name="direction">РќР°РїСЂР°РІР»РµРЅРёРµ РѕР±Р·РѕСЂР°.</param>
+    /// <param name="range">Р Р°РґРёСѓСЃ РѕР±Р·РѕСЂР° РІ РєР»РµС‚РєР°С….</param>
     public void RevealArea(Vector2Int start, Directions direction, int range = 3)
     {
         Vector2Int current = start;
         GetCell(current)?.Discover();
 
-        for (int i = 0; i < range; i++)
+        for (var i = 0; i < range; i++)
         {
             Vector2Int next = current + GetOffset(direction);
-            if (!IsInBounds(next)) break;
+            if (!IsInBounds(next))
+            {
+                break;
+            }
 
             Cell nextCell = GetCell(next);
-            if (nextCell == null) break;
+            if (nextCell == null)
+            {
+                break;
+            }
 
-            if (!GetCell(current).CanMove(direction)) break;
+            if (!GetCell(current).CanMove(direction))
+            {
+                break;
+            }
 
             nextCell.Discover();
             current = next;
@@ -300,30 +308,30 @@ public class GridManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Возвращает все клетки сетки.
+    /// Р’РѕР·РІСЂР°С‰Р°РµС‚ РІСЃРµ РєР»РµС‚РєРё СЃРµС‚РєРё.
     /// </summary>
     public IEnumerable<Cell> GetAllCells()
     {
-        for (int x = 0; x < _width; x++)
+        for (var x = 0; x < _width; x++)
         {
-            for (int y = 0; y < _height; y++)
+            for (var y = 0; y < _height; y++)
             {
                 yield return _grid[x, y];
             }
         }
     }
 
-    // ======== ВСПОМОГАТЕЛЬНЫЕ ========
+    // ======== Р’РЎРџРћРњРћР“РђРўР•Р›Р¬РќР«Р• ========
 
     private Vector2Int GetOffset(Directions dir)
     {
-        switch (dir)
+        return dir switch
         {
-            case Directions.North: return Vector2Int.up;
-            case Directions.South: return Vector2Int.down;
-            case Directions.East: return Vector2Int.right;
-            case Directions.West: return Vector2Int.left;
-            default: return Vector2Int.zero;
-        }
+            Directions.North => Vector2Int.up,
+            Directions.South => Vector2Int.down,
+            Directions.East => Vector2Int.right,
+            Directions.West => Vector2Int.left,
+            _ => Vector2Int.zero,
+        };
     }
 }
