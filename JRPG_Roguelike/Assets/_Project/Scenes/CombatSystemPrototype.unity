@@ -1660,7 +1660,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 34.1
+  m_fontSize: 28.05
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2733,20 +2733,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76b62152d5d0e5943b248eb92c3684b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  _actionPanel: {fileID: 0}
-  _inventoryPanel: {fileID: 0}
-  _spellPanel: {fileID: 0}
-  _messageText: {fileID: 0}
-  _playerHealthSlider: {fileID: 0}
-  _enemyHealthSlider: {fileID: 0}
-  _playerHealthText: {fileID: 0}
-  _enemyHealthText: {fileID: 0}
-  _playerManaSlider: {fileID: 0}
-  _playerManaText: {fileID: 0}
-  _inventoryContent: {fileID: 0}
-  _spellContent: {fileID: 0}
-  _itemButtonPrefab: {fileID: 0}
-  _spellButtonPrefab: {fileID: 0}
+  _actionPanel: {fileID: 851869209}
+  _inventoryPanel: {fileID: 886707791}
+  _spellPanel: {fileID: 736512348}
+  _messageText: {fileID: 18573338}
+  _playerHealthSlider: {fileID: 59954493}
+  _enemyHealthSlider: {fileID: 393290625}
+  _playerHealthText: {fileID: 226474342}
+  _enemyHealthText: {fileID: 2077485498}
+  _playerManaSlider: {fileID: 1160879071}
+  _playerManaText: {fileID: 2035334880}
+  _inventoryContent: {fileID: 1907087145}
+  _spellContent: {fileID: 1323698780}
+  _itemButtonPrefab: {fileID: 1536707473405246001, guid: e79ece166b2a7fb4192e5bf4db2bdc76, type: 3}
+  _spellButtonPrefab: {fileID: 1536707473405246001, guid: e79ece166b2a7fb4192e5bf4db2bdc76, type: 3}
 --- !u!1 &886707791
 GameObject:
   m_ObjectHideFlags: 0
@@ -3487,7 +3487,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 27
+  m_fontSize: 21.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4001,7 +4001,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 21.55
+  m_fontSize: 18.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4054,6 +4054,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1420471716}
   m_CullTransparentMesh: 1
+--- !u!1 &1449024002 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 412164403667441659, guid: 32bf9eeb94e20aa4aad780b67762abaf, type: 3}
+  m_PrefabInstance: {fileID: 1210691910281322107}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1453607124
 GameObject:
   m_ObjectHideFlags: 0
@@ -5513,8 +5518,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2c0d45a05f2d784298b79733b7c2aa5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleManager
-  _playerGO: {fileID: 0}
-  _enemyGO: {fileID: 0}
+  _playerGO: {fileID: 1449024002}
+  _enemyGO: {fileID: 762577578}
 --- !u!4 &1999358664
 Transform:
   m_ObjectHideFlags: 0
