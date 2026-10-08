@@ -416,6 +416,50 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &1826505868
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1826505870}
+  - component: {fileID: 1826505869}
+  m_Layer: 0
+  m_Name: LevelGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1826505869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1826505868}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55d8d80431cfb2847be85848341e9de7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FlameDragon.Runtime::FlameDragonLevelGenerator
+--- !u!4 &1826505870
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1826505868}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 749.6357, y: 267.26343, z: -35.98718}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &3922016428166298078
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -533,6 +577,10 @@ PrefabInstance:
       propertyPath: _finishMarker
       value: 
       objectReference: {fileID: 1628907840296366201, guid: 8c02e04a5da69cd4fbea4d2af08cae28, type: 3}
+    - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
+      propertyPath: _levelGenerator
+      value: 
+      objectReference: {fileID: 1826505869}
     - target: {fileID: 5547269393730807899, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: m_LocalPosition.x
       value: 4.46895
@@ -627,3 +675,4 @@ SceneRoots:
   - {fileID: 47643347}
   - {fileID: 3922016428166298078}
   - {fileID: 925330042}
+  - {fileID: 1826505870}

@@ -10,9 +10,7 @@ public class FlameDragonLevelGenerator : LevelGenerator
     {
         return type switch
         {
-            // Пока алгоритмы не реализованы — возвращаем null.
-            // В следующих шагах здесь появятся:
-            // GenerationAlgorithm.RecursiveBacktracking => new RecursiveBacktrackingAlgorithm(),
+            GenerationAlgorithm.RecursiveBacktracking => new RecursiveBacktrackingAlgorithm(),
             // GenerationAlgorithm.BSP => new BSPAlgorithm(),
             // GenerationAlgorithm.CellularAutomata => new CellularAutomataAlgorithm(),
             _ => null

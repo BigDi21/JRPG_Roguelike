@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Управляет сеткой уровня: генерацией лабиринта, хранением клеток, визуализацией и туманом войны.
+/// Управляет сеткой уровня: генерацией через LevelGenerator,
+/// хранением клеток, визуализацией и туманом войны.
 /// </summary>
-
 [DefaultExecutionOrder(-100)]
 public class GridManager : MonoBehaviour
 {
@@ -16,6 +16,9 @@ public class GridManager : MonoBehaviour
 
     [Header("Размер ячейки")]
     [SerializeField] private float _cellSize = 10f;
+
+    [Header("Генерация")]
+    [SerializeField] private FlameDragonLevelGenerator _levelGenerator;
 
     [Header("Префабы")]
     [SerializeField] private GameObject _cellPrefab;
@@ -55,8 +58,13 @@ public class GridManager : MonoBehaviour
             return;
         }
 
+        if (_levelGenerator == null)
+        {
+            Debug.LogError("[GridManager] LevelGenerator не назначен в инспекторе!");
+            return;
+        }
+
         GenerateGrid(_width, _height);
-        PlaceStartAndFinish();
     }
 
     private void Start() => CreateVisuals();
@@ -64,156 +72,54 @@ public class GridManager : MonoBehaviour
     // ======== ГЕНЕРАЦИЯ ========
 
     /// <summary>
-    /// Генерирует новую сетку указанного размера с помощью DFS-лабиринта.
+    /// Генерирует новую сетку указанного размера.
     /// </summary>
-    /// <param name="width">Ширина сетки.</param>
-    /// <param name="height">Высота сетки.</param>
     public void GenerateGrid(int width, int height)
     {
-        _width = width;
-        _height = height;
-        _grid = new Cell[_width, _height];
+        var seed = Random.Range(int.MinValue, int.MaxValue);
+
+        LevelGrid levelGrid = _levelGenerator.Generate(
+            width,
+            height,
+            seed,
+            GenerationAlgorithm.RecursiveBacktracking,
+            AlgorithmParams.DefaultMaze);
+
+        if (levelGrid.Cells == null)
+        {
+            Debug.LogError("[GridManager] Генерация вернула пустой результат!");
+            return;
+        }
+
+        _width = levelGrid.Width;
+        _height = levelGrid.Height;
+        _grid = levelGrid.Cells;
+        StartPosition = levelGrid.SpawnPoint;
+        FinishPosition = new Vector2Int(_width - 1, _height - 1);
+
+        RebuildCellMap();
+
+        Debug.Log($"[GridManager] Сетка {_width}×{_height} сгенерирована (seed={seed})");
+    }
+
+    private void RebuildCellMap()
+    {
         _cellMap = new Dictionary<Vector2Int, Cell>();
 
-        CreateEmptyCells();
-        GenerateMaze();
-        EnsureNoIsolatedCells();
-    }
-
-    private void CreateEmptyCells()
-    {
         for (var x = 0; x < _width; x++)
         {
             for (var y = 0; y < _height; y++)
             {
-                var pos = new Vector2Int(x, y);
-                var cell = new Cell(pos);
-                _grid[x, y] = cell;
-                _cellMap[pos] = cell;
+                _cellMap[new Vector2Int(x, y)] = _grid[x, y];
             }
         }
-    }
-
-    private void GenerateMaze()
-    {
-        var visited = new bool[_width, _height];
-        var stack = new Stack<Vector2Int>();
-        var start = new Vector2Int(0, 0);
-        visited[start.x, start.y] = true;
-        stack.Push(start);
-
-        while (stack.Count > 0)
-        {
-            Vector2Int current = stack.Peek();
-            List<Vector2Int> neighbors = GetUnvisitedNeighbors(current, visited);
-
-            if (neighbors.Count > 0)
-            {
-                Vector2Int next = neighbors[Random.Range(0, neighbors.Count)];
-                RemoveWall(current, next);
-                visited[next.x, next.y] = true;
-                stack.Push(next);
-            }
-            else
-            {
-                stack.Pop();
-            }
-        }
-    }
-
-    private void EnsureNoIsolatedCells()
-    {
-        for (var x = 0; x < _width; x++)
-        {
-            for (var y = 0; y < _height; y++)
-            {
-                if (_grid[x, y].Connections == Directions.None && (x != 0 || y != 0))
-                {
-                    ForceConnect(_grid[x, y]);
-                }
-            }
-        }
-    }
-
-    private List<Vector2Int> GetUnvisitedNeighbors(Vector2Int pos, bool[,] visited)
-    {
-        var result = new List<Vector2Int>();
-        Vector2Int[] dirs = { Vector2Int.up, Vector2Int.right, Vector2Int.down, Vector2Int.left };
-
-        foreach (Vector2Int dir in dirs)
-        {
-            Vector2Int neighbor = pos + dir;
-            if (IsInBounds(neighbor) && !visited[neighbor.x, neighbor.y])
-            {
-                result.Add(neighbor);
-            }
-        }
-
-        return result;
-    }
-
-    private void RemoveWall(Vector2Int a, Vector2Int b)
-    {
-        Cell cellA = _grid[a.x, a.y];
-        Cell cellB = _grid[b.x, b.y];
-        Vector2Int diff = b - a;
-
-        if (diff == Vector2Int.up)
-        {
-            cellA.AddConnection(Directions.North);
-            cellB.AddConnection(Directions.South);
-        }
-        else if (diff == Vector2Int.right)
-        {
-            cellA.AddConnection(Directions.East);
-            cellB.AddConnection(Directions.West);
-        }
-        else if (diff == Vector2Int.down)
-        {
-            cellA.AddConnection(Directions.South);
-            cellB.AddConnection(Directions.North);
-        }
-        else if (diff == Vector2Int.left)
-        {
-            cellA.AddConnection(Directions.West);
-            cellB.AddConnection(Directions.East);
-        }
-    }
-
-    private void ForceConnect(Cell cell)
-    {
-        Vector2Int pos = cell.Position;
-        var neighbors = new List<Vector2Int>
-        {
-            pos + Vector2Int.up,
-            pos + Vector2Int.right,
-            pos + Vector2Int.down,
-            pos + Vector2Int.left
-        };
-
-        foreach (Vector2Int neighborPos in neighbors)
-        {
-            if (IsInBounds(neighborPos))
-            {
-                RemoveWall(pos, neighborPos);
-                return;
-            }
-        }
-    }
-
-    private bool IsInBounds(Vector2Int pos) => pos.x >= 0 && pos.x < _width && pos.y >= 0 && pos.y < _height;
-
-    private void PlaceStartAndFinish()
-    {
-        StartPosition = new Vector2Int(_width - 1, 0);
-        FinishPosition = new Vector2Int(0, _height - 1);
     }
 
     // ======== ВИЗУАЛИЗАЦИЯ ========
 
     private void CreateVisuals()
     {
-        if (_cellPrefab == null)
+        if (_cellPrefab == null || _grid == null)
         {
             return;
         }
@@ -255,7 +161,7 @@ public class GridManager : MonoBehaviour
     /// <summary>
     /// Возвращает клетку по указанной позиции. null, если позиция вне сетки.
     /// </summary>
-    public Cell GetCell(Vector2Int pos) => _cellMap.TryGetValue(pos, out Cell cell) ? cell : null;
+    public Cell GetCell(Vector2Int pos) => _cellMap == null ? null : _cellMap.TryGetValue(pos, out Cell cell) ? cell : null;
 
     /// <summary>
     /// Возвращает клетку по координатам X и Y.
@@ -275,9 +181,6 @@ public class GridManager : MonoBehaviour
     /// <summary>
     /// Открывает область вокруг стартовой позиции в указанном направлении.
     /// </summary>
-    /// <param name="start">Стартовая позиция.</param>
-    /// <param name="direction">Направление обзора.</param>
-    /// <param name="range">Радиус обзора в клетках.</param>
     public void RevealArea(Vector2Int start, Directions direction, int range = 3)
     {
         Vector2Int current = start;
@@ -312,6 +215,11 @@ public class GridManager : MonoBehaviour
     /// </summary>
     public IEnumerable<Cell> GetAllCells()
     {
+        if (_grid == null)
+        {
+            yield break;
+        }
+
         for (var x = 0; x < _width; x++)
         {
             for (var y = 0; y < _height; y++)
@@ -334,4 +242,6 @@ public class GridManager : MonoBehaviour
             _ => Vector2Int.zero,
         };
     }
+
+    private bool IsInBounds(Vector2Int pos) => pos.x >= 0 && pos.x < _width && pos.y >= 0 && pos.y < _height;
 }
