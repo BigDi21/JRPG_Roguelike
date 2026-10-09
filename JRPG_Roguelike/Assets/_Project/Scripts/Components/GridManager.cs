@@ -24,6 +24,7 @@ public class GridManager : MonoBehaviour
     [Range(0, 100)]
     [Tooltip("Шанс появления петли (0–100%). 0 — идеальный лабиринт без петель, 100 — максимум петель.")]
     [SerializeField] private int _loopChance = 0;
+    public int CurrentSeed { get; private set; }
 
     [Header("Seed")]
     [Tooltip("Если включено — используется фиксированный seed (для тестов и отладки).")]
@@ -91,6 +92,8 @@ public class GridManager : MonoBehaviour
     public void GenerateGrid(int width, int height)
     {
         var seed = _useFixedSeed ? _fixedSeed : Random.Range(int.MinValue, int.MaxValue);
+        CurrentSeed = seed;
+        Random.InitState(seed);
 
         AlgorithmParams parameters = BuildAlgorithmParams();
 
@@ -302,6 +305,22 @@ public class GridManager : MonoBehaviour
             Directions.West => Vector2Int.left,
             _ => Vector2Int.zero,
         };
+    }
+
+    public void RegenerateWithSameSeed()
+    {
+        ClearVisuals();
+        SetFixedSeed(CurrentSeed);
+        GenerateGrid(_width, _height);
+        CreateVisuals();
+    }
+
+    private void ClearVisuals()
+    {
+        for (var i = transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(transform.GetChild(i).gameObject);
+        }
     }
 
     private bool IsInBounds(Vector2Int pos) => pos.x >= 0 && pos.x < _width && pos.y >= 0 && pos.y < _height;
