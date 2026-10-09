@@ -124,4 +124,59 @@ public class RecursiveBacktrackingTests
 
         return count;
     }
+
+    [Test]
+    public void Generate_WithLoopChance_AddsExtraConnections()
+    {
+        // Arrange
+        var algo = new RecursiveBacktrackingAlgorithm();
+
+        AlgorithmParams noLoops = AlgorithmParams.DefaultMaze;
+
+        AlgorithmParams withLoops = AlgorithmParams.DefaultMaze;
+        withLoops.LoopChance = 50;
+
+        // Act
+        LevelGrid perfectMaze = algo.Generate(10, 10, 42, noLoops);
+        LevelGrid loopedMaze = algo.Generate(10, 10, 42, withLoops);
+
+        // Assert
+        var perfectBits = CountAllConnectionBits(perfectMaze);
+        var loopedBits = CountAllConnectionBits(loopedMaze);
+
+        Assert.Greater(loopedBits, perfectBits,
+            "С петлями должно быть больше соединений, чем без петель");
+    }
+
+    [Test]
+    public void Generate_LoopChanceZero_IsIdealMaze()
+    {
+        // Arrange
+        var algo = new RecursiveBacktrackingAlgorithm();
+        AlgorithmParams p = AlgorithmParams.DefaultMaze;
+        p.LoopChance = 0;
+
+        // Act
+        LevelGrid maze = algo.Generate(10, 10, 42, p);
+
+        // Assert
+        var bits = CountAllConnectionBits(maze);
+        var expected = ((10 * 10) - 1) * 2;
+
+        Assert.AreEqual(expected, bits,
+            "Без петель должно быть ровно N-1 рёбер");
+    }
+
+    private int CountAllConnectionBits(LevelGrid grid)
+    {
+        var total = 0;
+        for (var x = 0; x < grid.Width; x++)
+        {
+            for (var y = 0; y < grid.Height; y++)
+            {
+                total += CountConnections(grid.Cells[x, y].Connections);
+            }
+        }
+        return total;
+    }
 }

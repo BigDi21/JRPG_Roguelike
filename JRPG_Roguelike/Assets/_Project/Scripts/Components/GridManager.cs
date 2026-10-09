@@ -20,6 +20,17 @@ public class GridManager : MonoBehaviour
     [Header("Генерация")]
     [SerializeField] private FlameDragonLevelGenerator _levelGenerator;
 
+    [Header("Параметры лабиринта")]
+    [Range(0, 100)]
+    [Tooltip("Шанс появления петли (0–100%). 0 — идеальный лабиринт без петель, 100 — максимум петель.")]
+    [SerializeField] private int _loopChance = 0;
+
+    [Header("Seed")]
+    [Tooltip("Если включено — используется фиксированный seed (для тестов и отладки).")]
+    [SerializeField] private bool _useFixedSeed = false;
+    [Tooltip("Значение seed. Работает только если Use Fixed Seed включён.")]
+    [SerializeField] private int _fixedSeed = 12345;
+
     [Header("Префабы")]
     [SerializeField] private GameObject _cellPrefab;
     [SerializeField] private GameObject _startMarker;
@@ -39,6 +50,9 @@ public class GridManager : MonoBehaviour
 
     /// <summary>Двумерный массив клеток.</summary>
     public Cell[,] Grid => _grid;
+
+    /// <summary>Текущий шанс появления петли (0–100%).</summary>
+    public int LoopChance => _loopChance;
 
     /// <summary>Стартовая позиция игрока на сетке.</summary>
     public Vector2Int StartPosition { get; private set; }
@@ -72,18 +86,20 @@ public class GridManager : MonoBehaviour
     // ======== ГЕНЕРАЦИЯ ========
 
     /// <summary>
-    /// Генерирует новую сетку указанного размера.
+    /// Генерирует новую сетку указанного размера с текущими параметрами.
     /// </summary>
     public void GenerateGrid(int width, int height)
     {
-        var seed = Random.Range(int.MinValue, int.MaxValue);
+        var seed = _useFixedSeed ? _fixedSeed : Random.Range(int.MinValue, int.MaxValue);
+
+        AlgorithmParams parameters = BuildAlgorithmParams();
 
         LevelGrid levelGrid = _levelGenerator.Generate(
             width,
             height,
             seed,
             GenerationAlgorithm.RecursiveBacktracking,
-            AlgorithmParams.DefaultMaze);
+            parameters);
 
         if (levelGrid.Cells == null)
         {
@@ -99,7 +115,22 @@ public class GridManager : MonoBehaviour
 
         RebuildCellMap();
 
-        Debug.Log($"[GridManager] Сетка {_width}×{_height} сгенерирована (seed={seed})");
+        Debug.Log($"[GridManager] Сетка {_width}×{_height} (seed={seed}, loop={_loopChance}%)");
+    }
+
+    /// <summary>
+    /// Собирает параметры алгоритма из полей инспектора.
+    /// </summary>
+    private AlgorithmParams BuildAlgorithmParams()
+    {
+        return new AlgorithmParams
+        {
+            LoopChance = _loopChance,
+            MinRoomSize = 0,
+            MaxRoomSize = 0,
+            MinRooms = 0,
+            MaxRooms = 0
+        };
     }
 
     private void RebuildCellMap()
@@ -114,6 +145,28 @@ public class GridManager : MonoBehaviour
             }
         }
     }
+
+    // ======== ПУБЛИЧНЫЕ СЕТТЕРЫ (для смены локации) ========
+
+    /// <summary>
+    /// Устанавливает шанс появления петли. Значение 0–100.
+    /// Не забудь вызвать GenerateGrid() после смены.
+    /// </summary>
+    public void SetLoopChance(int value) => _loopChance = Mathf.Clamp(value, 0, 100);
+
+    /// <summary>
+    /// Устанавливает фиксированный seed для воспроизводимой генерации.
+    /// </summary>
+    public void SetFixedSeed(int seed)
+    {
+        _useFixedSeed = true;
+        _fixedSeed = seed;
+    }
+
+    /// <summary>
+    /// Отключает фиксированный seed — генерация будет случайной.
+    /// </summary>
+    public void UseRandomSeed() => _useFixedSeed = false;
 
     // ======== ВИЗУАЛИЗАЦИЯ ========
 
@@ -161,7 +214,15 @@ public class GridManager : MonoBehaviour
     /// <summary>
     /// Возвращает клетку по указанной позиции. null, если позиция вне сетки.
     /// </summary>
-    public Cell GetCell(Vector2Int pos) => _cellMap == null ? null : _cellMap.TryGetValue(pos, out Cell cell) ? cell : null;
+    public Cell GetCell(Vector2Int pos)
+    {
+        if (_cellMap == null)
+        {
+            return null;
+        }
+
+        return _cellMap.TryGetValue(pos, out Cell cell) ? cell : null;
+    }
 
     /// <summary>
     /// Возвращает клетку по координатам X и Y.
