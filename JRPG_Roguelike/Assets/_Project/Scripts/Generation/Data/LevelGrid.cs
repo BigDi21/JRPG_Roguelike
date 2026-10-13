@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Результат работы алгоритма генерации. Содержит сетку, точки спавна и выходы.
+/// Результат работы алгоритма генерации. Содержит сетку, точки спавна, выходы и комнаты.
 /// </summary>
 public struct LevelGrid
 {
@@ -20,4 +20,11 @@ public struct LevelGrid
 
     /// <summary>Список выходов из локации.</summary>
     public List<Vector2Int> Exits;
+
+    /// <summary>
+    /// Список комнат (границы прямоугольниками).
+    /// Используется для механики «открыть комнату при входе».
+    /// Может быть пустым для алгоритмов, которые не создают комнаты (DFS).
+    /// </summary>
+    public List<RectInt> Rooms;
 }

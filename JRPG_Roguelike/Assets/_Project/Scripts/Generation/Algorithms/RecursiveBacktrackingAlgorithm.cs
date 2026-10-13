@@ -27,6 +27,7 @@ public class RecursiveBacktrackingAlgorithm : ILevelAlgorithm
             Height = height,
             Cells = new Cell[width, height],
             Exits = new List<Vector2Int>(),
+            Rooms = new List<RectInt>(),
             SpawnPoint = new Vector2Int(1, 1)
         };
 

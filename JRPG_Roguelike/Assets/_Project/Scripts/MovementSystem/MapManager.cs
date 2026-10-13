@@ -2,18 +2,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Управляет миникартой, большой картой и туманом войны.
+/// РЈРїСЂР°РІР»СЏРµС‚ РјРёРЅРёРєР°СЂС‚РѕР№, Р±РѕР»СЊС€РѕР№ РєР°СЂС‚РѕР№ Рё С‚СѓРјР°РЅРѕРј РІРѕР№РЅС‹.
 /// </summary>
 public class MapManager : MonoBehaviour
 {
     public static MapManager Instance { get; private set; }
 
-    private const float MouseSensitivityScale = 0.01f;
-    private const float TileMatchThreshold = 0.01f;
-    private const float MarkerRotationNorth = 180f;
-    private const float MarkerRotationEast = 90f;
-    private const float MarkerRotationSouth = 0f;
-    private const float MarkerRotationWest = 270f;
+    private const float _mouseSensitivityScale = 0.01f;
+    private const float _tileMatchThreshold = 0.01f;
+    private const float _markerRotationNorth = 180f;
+    private const float _markerRotationEast = 90f;
+    private const float _markerRotationSouth = 0f;
+    private const float _markerRotationWest = 270f;
 
     [Header("UI References")]
     [SerializeField] private Transform _bigMapContainer;
@@ -54,7 +54,7 @@ public class MapManager : MonoBehaviour
     private RectTransform _panelRect;
 
     /// <summary>
-    /// Ленивая инициализация GridManager. Возвращает null, если его нет на сцене.
+    /// Р›РµРЅРёРІР°СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ GridManager. Р’РѕР·РІСЂР°С‰Р°РµС‚ null, РµСЃР»Рё РµРіРѕ РЅРµС‚ РЅР° СЃС†РµРЅРµ.
     /// </summary>
     private GridManager Grid => _gridManager != null ? _gridManager : (_gridManager = GridManager.Instance);
 
@@ -82,16 +82,22 @@ public class MapManager : MonoBehaviour
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.M))
+        {
             ToggleBigMap();
+        }
 
         if (Input.GetKeyDown(KeyCode.Tab))
+        {
             ToggleFog();
+        }
 
         if (_bigMapOpen && _containerRect != null)
+        {
             HandleBigMapInput();
+        }
     }
 
-    // ======== ИНИЦИАЛИЗАЦИЯ ========
+    // ======== РРќРР¦РРђР›РР—РђР¦РРЇ ========
 
     private void InitializeBigMapContainers()
     {
@@ -105,10 +111,12 @@ public class MapManager : MonoBehaviour
         }
 
         if (_bigMapPanel != null)
+        {
             _panelRect = _bigMapPanel.GetComponent<RectTransform>();
+        }
     }
 
-    // ======== УПРАВЛЕНИЕ БОЛЬШОЙ КАРТОЙ ========
+    // ======== РЈРџР РђР’Р›Р•РќРР• Р‘РћР›Р¬РЁРћР™ РљРђР РўРћР™ ========
 
     private void HandleBigMapInput()
     {
@@ -119,12 +127,30 @@ public class MapManager : MonoBehaviour
     private void HandleArrowKeys()
     {
         Vector2 move = Vector2.zero;
-        if (Input.GetKey(KeyCode.UpArrow)) move.y += _panSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.DownArrow)) move.y -= _panSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.LeftArrow)) move.x -= _panSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.RightArrow)) move.x += _panSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.UpArrow))
+        {
+            move.y += _panSpeed * Time.deltaTime;
+        }
 
-        if (move == Vector2.zero) return;
+        if (Input.GetKey(KeyCode.DownArrow))
+        {
+            move.y -= _panSpeed * Time.deltaTime;
+        }
+
+        if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            move.x -= _panSpeed * Time.deltaTime;
+        }
+
+        if (Input.GetKey(KeyCode.RightArrow))
+        {
+            move.x += _panSpeed * Time.deltaTime;
+        }
+
+        if (move == Vector2.zero)
+        {
+            return;
+        }
 
         _bigMapOffset += move;
         ClampOffset();
@@ -143,19 +169,24 @@ public class MapManager : MonoBehaviour
         if (Input.GetMouseButton(0) && _isDragging)
         {
             Vector3 delta = Input.mousePosition - _dragStartMousePos;
-            Vector2 worldDelta = new Vector2(delta.x, delta.y) * _mouseSensitivity * MouseSensitivityScale;
+            Vector2 worldDelta = _mouseSensitivity * _mouseSensitivityScale * (Vector2)delta;
             _bigMapOffset = _dragStartContainerPos + worldDelta;
             ClampOffset();
             _containerRect.anchoredPosition = _bigMapOffset;
         }
 
         if (Input.GetMouseButtonUp(0))
+        {
             _isDragging = false;
+        }
     }
 
     private void UpdateBigMapSize()
     {
-        if (Grid == null) return;
+        if (Grid == null)
+        {
+            return;
+        }
 
         _bigMapSize = new Vector2(Grid.Width * _tileSize, Grid.Height * _tileSize);
 
@@ -172,27 +203,33 @@ public class MapManager : MonoBehaviour
 
     private void ClampOffset()
     {
-        if (_panelRect == null || _containerRect == null) return;
+        if (_panelRect == null || _containerRect == null)
+        {
+            return;
+        }
 
-        float diffX = _containerRect.rect.width - _panelRect.rect.width;
-        float diffY = _containerRect.rect.height - _panelRect.rect.height;
+        var diffX = _containerRect.rect.width - _panelRect.rect.width;
+        var diffY = _containerRect.rect.height - _panelRect.rect.height;
 
-        float maxX = Mathf.Abs(diffX) / 2f;
-        float maxY = Mathf.Abs(diffY) / 2f;
+        var maxX = Mathf.Abs(diffX) / 2f;
+        var maxY = Mathf.Abs(diffY) / 2f;
 
         _bigMapOffset.x = Mathf.Clamp(_bigMapOffset.x, -maxX, maxX);
         _bigMapOffset.y = Mathf.Clamp(_bigMapOffset.y, -maxY, maxY);
     }
 
-    // ======== ПУБЛИЧНЫЙ API ========
+    // ======== РџРЈР‘Р›РР§РќР«Р™ API ========
 
     /// <summary>
-    /// Создаёт тайл миникарты для указанной клетки, если его ещё нет.
+    /// РЎРѕР·РґР°С‘С‚ С‚Р°Р№Р» РјРёРЅРёРєР°СЂС‚С‹ РґР»СЏ СѓРєР°Р·Р°РЅРЅРѕР№ РєР»РµС‚РєРё, РµСЃР»Рё РµРіРѕ РµС‰С‘ РЅРµС‚.
     /// </summary>
-    /// <param name="cell">Клетка для отображения.</param>
+    /// <param name="cell">РљР»РµС‚РєР° РґР»СЏ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ.</param>
     public void ShowTile(Cell cell)
     {
-        if (cell == null || _tiles.ContainsKey(cell.Position)) return;
+        if (cell == null || _tiles.ContainsKey(cell.Position))
+        {
+            return;
+        }
 
         GameObject go = Instantiate(_mapTilePrefab, _bigMapContainer);
         MapTile tile = go.GetComponent<MapTile>();
@@ -206,29 +243,31 @@ public class MapManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Обновляет миникарту и большую карту под текущую позицию игрока.
+    /// РћР±РЅРѕРІР»СЏРµС‚ РјРёРЅРёРєР°СЂС‚Сѓ Рё Р±РѕР»СЊС€СѓСЋ РєР°СЂС‚Сѓ РїРѕРґ С‚РµРєСѓС‰СѓСЋ РїРѕР·РёС†РёСЋ РёРіСЂРѕРєР°.
     /// </summary>
-    /// <param name="playerPos">Позиция игрока на сетке.</param>
-    /// <param name="facingDir">Направление взгляда игрока.</param>
-    /// <param name="range">Радиус обзора для тумана войны.</param>
+    /// <param name="playerPos">РџРѕР·РёС†РёСЏ РёРіСЂРѕРєР° РЅР° СЃРµС‚РєРµ.</param>
+    /// <param name="facingDir">РќР°РїСЂР°РІР»РµРЅРёРµ РІР·РіР»СЏРґР° РёРіСЂРѕРєР°.</param>
+    /// <param name="range">Р Р°РґРёСѓСЃ РѕР±Р·РѕСЂР° РґР»СЏ С‚СѓРјР°РЅР° РІРѕР№РЅС‹.</param>
     public void UpdateMap(Vector2Int playerPos, Directions facingDir, int range = 3)
     {
         if (Grid == null)
         {
-            Debug.LogError("[MapManager] GridManager не найден!");
+            Debug.LogError("[MapManager] GridManager РЅРµ РЅР°Р№РґРµРЅ!");
             return;
         }
 
         _playerPosition = playerPos;
         Grid.RevealArea(playerPos, facingDir, range);
 
-        foreach (var cell in Grid.GetAllCells())
+        foreach (Cell cell in Grid.GetAllCells())
         {
             if (cell.IsDiscovered && !_tiles.ContainsKey(cell.Position))
+            {
                 ShowTile(cell);
+            }
         }
 
-        Vector3 targetPos = new Vector3(-playerPos.x * _tileSize, -playerPos.y * _tileSize, 0);
+        var targetPos = new Vector3(-playerPos.x * _tileSize, -playerPos.y * _tileSize, 0);
         _bigMapContainer.localPosition = targetPos;
 
         UpdatePlayerMarker(playerPos, facingDir);
@@ -241,35 +280,39 @@ public class MapManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Обновляет позицию и поворот маркера игрока на миникарте.
+    /// РћР±РЅРѕРІР»СЏРµС‚ РїРѕР·РёС†РёСЋ Рё РїРѕРІРѕСЂРѕС‚ РјР°СЂРєРµСЂР° РёРіСЂРѕРєР° РЅР° РјРёРЅРёРєР°СЂС‚Рµ.
     /// </summary>
     public void UpdatePlayerMarker(Vector2Int playerPos, Directions facingDir = Directions.North)
     {
         if (_playerMarkerInstance == null)
         {
-            if (_playerMarkerPrefab == null || _bigMapContainer == null) return;
+            if (_playerMarkerPrefab == null || _bigMapContainer == null)
+            {
+                return;
+            }
+
             _playerMarkerInstance = Instantiate(_playerMarkerPrefab, _bigMapContainer);
         }
 
-        Vector3 pos = new Vector3(playerPos.x * _tileSize, playerPos.y * _tileSize, 0);
+        var pos = new Vector3(playerPos.x * _tileSize, playerPos.y * _tileSize, 0);
         _playerMarkerInstance.transform.localPosition = pos;
         _playerMarkerInstance.transform.SetAsLastSibling();
         _playerMarkerInstance.SetActive(true);
 
-        float angle = facingDir switch
+        var angle = facingDir switch
         {
-            Directions.North => MarkerRotationNorth,
-            Directions.East => MarkerRotationEast,
-            Directions.South => MarkerRotationSouth,
-            Directions.West => MarkerRotationWest,
-            _ => MarkerRotationSouth
+            Directions.North => _markerRotationNorth,
+            Directions.East => _markerRotationEast,
+            Directions.South => _markerRotationSouth,
+            Directions.West => _markerRotationWest,
+            _ => _markerRotationSouth
         };
 
         _playerMarkerInstance.transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
     /// <summary>
-    /// Открывает или закрывает большую карту.
+    /// РћС‚РєСЂС‹РІР°РµС‚ РёР»Рё Р·Р°РєСЂС‹РІР°РµС‚ Р±РѕР»СЊС€СѓСЋ РєР°СЂС‚Сѓ.
     /// </summary>
     public void ToggleBigMap()
     {
@@ -291,7 +334,7 @@ public class MapManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Включает или отключает туман войны.
+    /// Р’РєР»СЋС‡Р°РµС‚ РёР»Рё РѕС‚РєР»СЋС‡Р°РµС‚ С‚СѓРјР°РЅ РІРѕР№РЅС‹.
     /// </summary>
     public void ToggleFog()
     {
@@ -299,11 +342,13 @@ public class MapManager : MonoBehaviour
         RefreshAllTiles();
 
         if (_bigMapOpen)
+        {
             BuildBigMap();
+        }
     }
 
     /// <summary>
-    /// Показывает всю карту (отключает туман войны).
+    /// РџРѕРєР°Р·С‹РІР°РµС‚ РІСЃСЋ РєР°СЂС‚Сѓ (РѕС‚РєР»СЋС‡Р°РµС‚ С‚СѓРјР°РЅ РІРѕР№РЅС‹).
     /// </summary>
     public void ShowFullMap()
     {
@@ -311,10 +356,12 @@ public class MapManager : MonoBehaviour
         RefreshAllTiles();
 
         if (_bigMapOpen)
+        {
             BuildBigMap();
+        }
     }
 
-    // ======== ПОСТРОЕНИЕ БОЛЬШОЙ КАРТЫ ========
+    // ======== РџРћРЎРўР РћР•РќРР• Р‘РћР›Р¬РЁРћР™ РљРђР РўР« ========
 
     private void BuildBigMap()
     {
@@ -322,7 +369,10 @@ public class MapManager : MonoBehaviour
 
         foreach (Transform child in _bigMapContainer)
         {
-            if (child.gameObject == _playerMarkerInstance) continue;
+            if (child.gameObject == _playerMarkerInstance)
+            {
+                continue;
+            }
 
             GameObject copy = Instantiate(child.gameObject, _bigMapFullContainer);
             copy.transform.localPosition = new Vector3(
@@ -341,7 +391,10 @@ public class MapManager : MonoBehaviour
 
     private void BuildBigMapPlayerMarker()
     {
-        if (_playerMarkerInstance == null) return;
+        if (_playerMarkerInstance == null)
+        {
+            return;
+        }
 
         _bigMapPlayerMarker = Instantiate(_playerMarkerInstance, _bigMapFullContainer);
         _bigMapPlayerMarker.transform.localPosition = new Vector3(
@@ -355,18 +408,27 @@ public class MapManager : MonoBehaviour
 
     private void UpdateBigMap()
     {
-        if (!_bigMapOpen) return;
+        if (!_bigMapOpen)
+        {
+            return;
+        }
 
         foreach (Transform child in _bigMapContainer)
         {
-            if (child.gameObject == _playerMarkerInstance) continue;
+            if (child.gameObject == _playerMarkerInstance)
+            {
+                continue;
+            }
 
-            Vector3 targetPos = new Vector3(
+            var targetPos = new Vector3(
                 child.localPosition.x + _bigMapCenterOffset.x,
                 child.localPosition.y + _bigMapCenterOffset.y,
                 0);
 
-            if (TileExistsAt(targetPos)) continue;
+            if (TileExistsAt(targetPos))
+            {
+                continue;
+            }
 
             GameObject copy = Instantiate(child.gameObject, _bigMapFullContainer);
             copy.transform.localPosition = targetPos;
@@ -382,10 +444,12 @@ public class MapManager : MonoBehaviour
 
     private bool TileExistsAt(Vector3 position)
     {
-        foreach (var tile in _bigMapTiles)
+        foreach (GameObject tile in _bigMapTiles)
         {
-            if (Vector3.Distance(tile.transform.localPosition, position) < TileMatchThreshold)
+            if (Vector3.Distance(tile.transform.localPosition, position) < _tileMatchThreshold)
+            {
                 return true;
+            }
         }
 
         return false;
@@ -393,20 +457,24 @@ public class MapManager : MonoBehaviour
 
     private void UpdateBigMapPlayerMarkerPosition()
     {
-        if (_bigMapPlayerMarker == null || _playerMarkerInstance == null) return;
+        if (_bigMapPlayerMarker == null || _playerMarkerInstance == null)
+        {
+            return;
+        }
 
-        _bigMapPlayerMarker.transform.localPosition = new Vector3(
+        _bigMapPlayerMarker.transform.SetLocalPositionAndRotation(new Vector3(
             _playerPosition.x * _tileSize + _bigMapCenterOffset.x,
             _playerPosition.y * _tileSize + _bigMapCenterOffset.y,
-            0);
-        _bigMapPlayerMarker.transform.localRotation = _playerMarkerInstance.transform.localRotation;
+            0), _playerMarkerInstance.transform.localRotation);
         _bigMapPlayerMarker.transform.SetAsLastSibling();
     }
 
     private void ClearBigMap()
     {
-        foreach (var tile in _bigMapTiles)
+        foreach (GameObject tile in _bigMapTiles)
+        {
             Destroy(tile);
+        }
 
         _bigMapTiles.Clear();
 
@@ -419,19 +487,26 @@ public class MapManager : MonoBehaviour
 
     private void RefreshAllTiles()
     {
-        if (Grid == null) return;
+        if (Grid == null)
+        {
+            return;
+        }
 
-        foreach (var kvp in _tiles)
+        foreach (KeyValuePair<Vector2Int, MapTile> kvp in _tiles)
         {
             Cell cell = Grid.GetCell(kvp.Key);
             if (cell != null)
+            {
                 kvp.Value.Initialize(cell, _fogOfWarEnabled);
+            }
         }
     }
 
     private void OnDestroy()
     {
         if (Instance == this)
+        {
             Instance = null;
+        }
     }
 }

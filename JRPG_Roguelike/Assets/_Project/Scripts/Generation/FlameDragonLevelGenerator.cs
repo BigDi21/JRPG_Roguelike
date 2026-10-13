@@ -11,7 +11,7 @@ public class FlameDragonLevelGenerator : LevelGenerator
         return type switch
         {
             GenerationAlgorithm.RecursiveBacktracking => new RecursiveBacktrackingAlgorithm(),
-            // GenerationAlgorithm.BSP => new BSPAlgorithm(),
+            GenerationAlgorithm.BSP => new BSPAlgorithm(),
             // GenerationAlgorithm.CellularAutomata => new CellularAutomataAlgorithm(),
             _ => null
         };

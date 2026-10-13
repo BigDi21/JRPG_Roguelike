@@ -943,8 +943,24 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
+      propertyPath: _width
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
+      propertyPath: _height
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
+      propertyPath: _cellSize
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
+      propertyPath: _algorithm
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _fixedSeed
-      value: -1097611957
+      value: 12345
       objectReference: {fileID: 0}
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _cellPrefab
@@ -952,7 +968,15 @@ PrefabInstance:
       objectReference: {fileID: 848303480885075875, guid: 6be158df36b9b1a48b73760088033431, type: 3}
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _loopChance
-      value: 0
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
+      propertyPath: _bspMaxRooms
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
+      propertyPath: _bspMinRooms
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _startMarker
@@ -965,6 +989,14 @@ PrefabInstance:
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _useFixedSeed
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
+      propertyPath: _bspMaxRoomSize
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
+      propertyPath: _bspMinRoomSize
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _levelGenerator

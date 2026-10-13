@@ -19,12 +19,27 @@ public class GridManager : MonoBehaviour
 
     [Header("Генерация")]
     [SerializeField] private FlameDragonLevelGenerator _levelGenerator;
+    [Tooltip("Какой алгоритм использовать для генерации.")]
+    [SerializeField] private GenerationAlgorithm _algorithm = GenerationAlgorithm.RecursiveBacktracking;
+
 
     [Header("Параметры лабиринта")]
     [Range(0, 100)]
     [Tooltip("Шанс появления петли (0–100%). 0 — идеальный лабиринт без петель, 100 — максимум петель.")]
     [SerializeField] private int _loopChance = 0;
-    public int CurrentSeed { get; private set; }
+
+    [Header("BSP — параметры Кладбища")]
+    [Tooltip("Минимальный размер комнаты в клетках.")]
+    [SerializeField] private int _bspMinRoomSize = 4;
+
+    [Tooltip("Максимальный размер комнаты в клетках.")]
+    [SerializeField] private int _bspMaxRoomSize = 6;
+
+    [Tooltip("Минимальное количество комнат.")]
+    [SerializeField] private int _bspMinRooms = 12;
+
+    [Tooltip("Максимальное количество комнат.")]
+    [SerializeField] private int _bspMaxRooms = 18;
 
     [Header("Seed")]
     [Tooltip("Если включено — используется фиксированный seed (для тестов и отладки).")]
@@ -39,6 +54,7 @@ public class GridManager : MonoBehaviour
 
     private Cell[,] _grid;
     private Dictionary<Vector2Int, Cell> _cellMap;
+    private List<RectInt> _rooms = new();
 
     /// <summary>Ширина сетки в клетках.</summary>
     public int Width => _width;
@@ -60,6 +76,9 @@ public class GridManager : MonoBehaviour
 
     /// <summary>Позиция выхода (финиша) на сетке.</summary>
     public Vector2Int FinishPosition { get; private set; }
+
+    /// <summary>Seed, использованный для текущей генерации.</summary>
+    public int CurrentSeed { get; private set; }
 
     private void Awake()
     {
@@ -84,6 +103,48 @@ public class GridManager : MonoBehaviour
 
     private void Start() => CreateVisuals();
 
+    /// <summary>
+    /// Ищет ближайшую проходимую клетку к указанной позиции.
+    /// Сканирует по расширяющемуся радиусу.
+    /// </summary>
+    private Vector2Int FindNearestWalkable(Vector2Int target)
+    {
+        if (GetCell(target) != null && GetCell(target).Connections != Directions.None)
+        {
+            return target;
+        }
+
+        for (var radius = 1; radius < Mathf.Max(_width, _height); radius++)
+        {
+            for (var dx = -radius; dx <= radius; dx++)
+            {
+                for (var dy = -radius; dy <= radius; dy++)
+                {
+                    var candidate = new Vector2Int(target.x + dx, target.y + dy);
+
+                    if (candidate.x < 0 || candidate.x >= _width)
+                    {
+                        continue;
+                    }
+
+                    if (candidate.y < 0 || candidate.y >= _height)
+                    {
+                        continue;
+                    }
+
+                    Cell cell = GetCell(candidate);
+                    if (cell != null && cell.Connections != Directions.None)
+                    {
+                        return candidate;
+                    }
+                }
+            }
+        }
+
+        Debug.LogWarning("[GridManager] Не удалось найти проходимую клетку для финиша!");
+        return target;
+    }
+
     // ======== ГЕНЕРАЦИЯ ========
 
     /// <summary>
@@ -93,6 +154,7 @@ public class GridManager : MonoBehaviour
     {
         var seed = _useFixedSeed ? _fixedSeed : Random.Range(int.MinValue, int.MaxValue);
         CurrentSeed = seed;
+
         Random.InitState(seed);
 
         AlgorithmParams parameters = BuildAlgorithmParams();
@@ -101,7 +163,7 @@ public class GridManager : MonoBehaviour
             width,
             height,
             seed,
-            GenerationAlgorithm.RecursiveBacktracking,
+            _algorithm,
             parameters);
 
         if (levelGrid.Cells == null)
@@ -114,12 +176,17 @@ public class GridManager : MonoBehaviour
         _height = levelGrid.Height;
         _grid = levelGrid.Cells;
         StartPosition = levelGrid.SpawnPoint;
-        FinishPosition = new Vector2Int(_width - 1, _height - 1);
+        FinishPosition = FindNearestWalkable(new Vector2Int(_width - 1, _height - 1));
+
+        _rooms = levelGrid.Rooms ?? new List<RectInt>();
 
         RebuildCellMap();
 
-        Debug.Log($"[GridManager] Сетка {_width}×{_height} (seed={seed}, loop={_loopChance}%)");
+        Debug.Log($"[GridManager] Комнат: {_rooms.Count}");
+
+        Debug.Log($"[GridManager] {_algorithm} {_width}×{_height} (seed={seed}, loop={_loopChance}%)");
     }
+
 
     /// <summary>
     /// Собирает параметры алгоритма из полей инспектора.
@@ -129,12 +196,13 @@ public class GridManager : MonoBehaviour
         return new AlgorithmParams
         {
             LoopChance = _loopChance,
-            MinRoomSize = 0,
-            MaxRoomSize = 0,
-            MinRooms = 0,
-            MaxRooms = 0
+            MinRoomSize = _bspMinRoomSize,
+            MaxRoomSize = _bspMaxRoomSize,
+            MinRooms = _bspMinRooms,
+            MaxRooms = _bspMaxRooms
         };
     }
+
 
     private void RebuildCellMap()
     {
@@ -183,19 +251,33 @@ public class GridManager : MonoBehaviour
         var offsetX = (_width - 1) * _cellSize * 0.5f;
         var offsetZ = (_height - 1) * _cellSize * 0.5f;
 
+        var spawnedCount = 0;
+
         for (var x = 0; x < _width; x++)
         {
             for (var y = 0; y < _height; y++)
             {
+                Cell cell = _grid[x, y];
+
+                // Пропускаем «мёртвые» клетки — те, в которые нельзя попасть
+                if (cell.Connections == Directions.None)
+                {
+                    continue;
+                }
+
                 var pos = new Vector3(x * _cellSize - offsetX, 0, y * _cellSize - offsetZ);
                 GameObject go = Instantiate(_cellPrefab, pos, Quaternion.identity, transform);
                 
                 if (go.TryGetComponent<CellVisual>(out CellVisual visual))
                 {
-                    visual.Initialize(_grid[x, y]);
+                    visual.Initialize(cell);
                 }
+
+                spawnedCount++;
             }
         }
+
+        Debug.Log($"[GridManager] Заспавнено клеток: {spawnedCount}");
 
         SpawnMarker(_startMarker, StartPosition, offsetX, offsetZ);
         SpawnMarker(_finishMarker, FinishPosition, offsetX, offsetZ);
@@ -247,8 +329,14 @@ public class GridManager : MonoBehaviour
     /// </summary>
     public void RevealArea(Vector2Int start, Directions direction, int range = 3)
     {
+        // 1. Открываем стартовую клетку
+        GetCell(start)?.Discover();
+
+        // 2. Если игрок в комнате — открываем всю комнату
+        RevealCurrentRoom(start);
+
+        // 3. Открываем «конус» в направлении взгляда
         Vector2Int current = start;
-        GetCell(current)?.Discover();
 
         for (var i = 0; i < range; i++)
         {
@@ -272,6 +360,50 @@ public class GridManager : MonoBehaviour
             nextCell.Discover();
             current = next;
         }
+    }
+
+    /// <summary>
+    /// Открывает всю комнату, в которой находится указанная позиция.
+    /// Если позиция не в комнате — ничего не делает.
+    /// </summary>
+    private void RevealCurrentRoom(Vector2Int position)
+    {
+        if (_rooms == null || _rooms.Count == 0)
+        {
+            return;
+        }
+
+        for (var i = 0; i < _rooms.Count; i++)
+        {
+            if (ContainsCell(_rooms[i], position))
+            {
+                RevealRoom(_rooms[i]);
+                return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Открывает все клетки внутри прямоугольника комнаты.
+    /// </summary>
+    private void RevealRoom(RectInt room)
+    {
+        for (var x = room.x; x < room.x + room.width; x++)
+        {
+            for (var y = room.y; y < room.y + room.height; y++)
+            {
+                GetCell(new Vector2Int(x, y))?.Discover();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Проверяет, находится ли клетка внутри прямоугольника.
+    /// </summary>
+    private bool ContainsCell(RectInt rect, Vector2Int pos)
+    {
+        return pos.x >= rect.x && pos.x < rect.x + rect.width
+            && pos.y >= rect.y && pos.y < rect.y + rect.height;
     }
 
     /// <summary>
