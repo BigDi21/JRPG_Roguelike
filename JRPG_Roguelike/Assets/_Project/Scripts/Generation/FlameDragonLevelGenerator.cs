@@ -12,7 +12,7 @@ public class FlameDragonLevelGenerator : LevelGenerator
         {
             GenerationAlgorithm.RecursiveBacktracking => new RecursiveBacktrackingAlgorithm(),
             GenerationAlgorithm.BSP => new BSPAlgorithm(),
-            // GenerationAlgorithm.CellularAutomata => new CellularAutomataAlgorithm(),
+            GenerationAlgorithm.CellularAutomata => new CellularAutomataAlgorithm(),
             _ => null
         };
     }

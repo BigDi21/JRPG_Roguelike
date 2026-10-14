@@ -11,8 +11,8 @@ public class GridManager : MonoBehaviour
     public static GridManager Instance { get; private set; }
 
     [Header("Размеры сетки")]
-    [SerializeField] private int _width = 20;
-    [SerializeField] private int _height = 20;
+    [SerializeField] private int _width = 60;
+    [SerializeField] private int _height = 60;
 
     [Header("Размер ячейки")]
     [SerializeField] private float _cellSize = 10f;
@@ -31,15 +31,26 @@ public class GridManager : MonoBehaviour
     [Header("BSP — параметры Кладбища")]
     [Tooltip("Минимальный размер комнаты в клетках.")]
     [SerializeField] private int _bspMinRoomSize = 4;
-
     [Tooltip("Максимальный размер комнаты в клетках.")]
     [SerializeField] private int _bspMaxRoomSize = 6;
-
     [Tooltip("Минимальное количество комнат.")]
     [SerializeField] private int _bspMinRooms = 12;
-
     [Tooltip("Максимальное количество комнат.")]
     [SerializeField] private int _bspMaxRooms = 18;
+
+    [Header("CA — параметры Пепельного леса")]
+    [Range(30, 60)]
+    [Tooltip("Процент начального заполнения стенами (0–100).")]
+    [SerializeField] private int _caFillChance = 46;
+
+    [Range(1, 10)]
+    [Tooltip("Количество итераций сглаживания.")]
+    [SerializeField] private int _caIterations = 4;
+
+    [Range(5, 100)]
+    [Tooltip("Минимальный размер связной области пола.")]
+    [SerializeField] private int _caMinRegionSize = 20;
+
 
     [Header("Seed")]
     [Tooltip("Если включено — используется фиксированный seed (для тестов и отладки).")]
@@ -199,10 +210,12 @@ public class GridManager : MonoBehaviour
             MinRoomSize = _bspMinRoomSize,
             MaxRoomSize = _bspMaxRoomSize,
             MinRooms = _bspMinRooms,
-            MaxRooms = _bspMaxRooms
+            MaxRooms = _bspMaxRooms,
+            FillChance = _caFillChance,
+            Iterations = _caIterations,
+            MinRegionSize = _caMinRegionSize
         };
     }
-
 
     private void RebuildCellMap()
     {
