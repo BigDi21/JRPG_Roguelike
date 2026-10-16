@@ -340,7 +340,7 @@ public class GridManager : MonoBehaviour
     /// <summary>
     /// Открывает область вокруг стартовой позиции в указанном направлении.
     /// </summary>
-    public void RevealArea(Vector2Int start, Directions direction, int range = 3)
+    public void RevealArea(Vector2Int start, Directions direction)
     {
         // 1. Открываем стартовую клетку
         GetCell(start)?.Discover();
@@ -348,31 +348,193 @@ public class GridManager : MonoBehaviour
         // 2. Если игрок в комнате — открываем всю комнату
         RevealCurrentRoom(start);
 
-        // 3. Открываем «конус» в направлении взгляда
-        Vector2Int current = start;
+        // 3. Открываем область видимости (кайт) в направлении взгляда
+        RevealVisionShape(start, direction);
+    }
 
-        for (var i = 0; i < range; i++)
+    /// <summary>
+    /// Открывает клетки в форме «кайт» в направлении взгляда.
+    /// Форма: 4 клетки вперёд, 2 назад, 3 влево/вправо на самом широком ряду.
+    /// </summary>
+    private void RevealVisionShape(Vector2Int center, Directions facing)
+    {
+        Vector2Int forwardDir = GetOffset(facing);
+        Vector2Int rightDir = GetRightVector(facing);
+
+        // halfWidth для каждого forward offset.
+        // Индекс = forward + 2 (диапазон forward: -2 … +4).
+        // forward = -2 → 1 (3 клетки)
+        // forward = -1 → 2 (5 клеток)
+        // forward =  0 → 3 (7 клеток) — ряд игрока
+        // forward = +1 → 3 (7 клеток)
+        // forward = +2 → 2 (5 клеток)
+        // forward = +3 → 1 (3 клетки)
+        // forward = +4 → 0 (1 клетка) — острие
+        int[] halfWidths = { 1, 2, 3, 3, 2, 1, 0 };
+        const int minForward = -2;
+        const int maxForward = 4;
+
+        for (var fwd = minForward; fwd <= maxForward; fwd++)
         {
-            Vector2Int next = current + GetOffset(direction);
-            if (!IsInBounds(next))
-            {
-                break;
-            }
+            var halfWidth = halfWidths[fwd - minForward];
 
-            Cell nextCell = GetCell(next);
-            if (nextCell == null)
+            for (var side = -halfWidth; side <= halfWidth; side++)
             {
-                break;
-            }
+                Vector2Int pos = center + forwardDir * fwd + rightDir * side;
+                if (!IsInBounds(pos))
+                {
+                    continue;
+                }
 
-            if (!GetCell(current).CanMove(direction))
-            {
-                break;
-            }
+                Cell cell = GetCell(pos);
+                if (cell == null)
+                {
+                    continue;
+                }
 
-            nextCell.Discover();
-            current = next;
+                // Пропускаем клетки-стены (актуально для BSP и CA)
+                if (cell.Connections == Directions.None)
+                {
+                    continue;
+                }
+
+                if (!HasLineOfSight(center, pos))
+                {
+                    continue;
+                }
+
+                cell.Discover();
+            }
         }
+    }
+
+    /// <summary>
+    /// Проверяет, есть ли прямая линия видимости между двумя клетками.
+    /// Использует алгоритм Брезенхэма. Стены (клетки без соединений) блокируют обзор.
+    /// </summary>
+    /// <param name="from">Начальная клетка (позиция игрока).</param>
+    /// <param name="to">Целевая клетка.</param>
+    /// <returns>True, если между клетками нет стен.</returns>
+    /// <summary>
+    /// Проверяет, есть ли прямая линия видимости между двумя клетками.
+    /// Работает через соединения клеток, а не через тип клетки.
+    /// Подходит для всех алгоритмов: DFS, BSP, CA.
+    /// </summary>
+    private bool HasLineOfSight(Vector2Int from, Vector2Int to)
+    {
+        if (from == to)
+        {
+            return true;
+        }
+
+        int x0 = from.x, y0 = from.y;
+        int x1 = to.x, y1 = to.y;
+
+        var dx = Mathf.Abs(x1 - x0);
+        var dy = Mathf.Abs(y1 - y0);
+        var sx = x0 < x1 ? 1 : -1;
+        var sy = y0 < y1 ? 1 : -1;
+        var err = dx - dy;
+
+        var prevX = x0;
+        var prevY = y0;
+
+        while (true)
+        {
+            var e2 = 2 * err;
+            if (e2 > -dy)
+            { err -= dy; x0 += sx; }
+            if (e2 < dx)
+            { err += dx; y0 += sy; }
+
+            // Проверяем переход между предыдущей и текущей клеткой
+            if (!CanWalkBetween(prevX, prevY, x0, y0))
+            {
+                return false;
+            }
+
+            if (x0 == x1 && y0 == y1)
+            {
+                return true;
+            }
+
+            prevX = x0;
+            prevY = y0;
+        }
+    }
+
+    /// <summary>
+    /// Проверяет, можно ли пройти из клетки (fromX, fromY) в (toX, toY).
+    /// Учитывает 4-направленные соединения и диагональные шаги.
+    /// </summary>
+    private bool CanWalkBetween(int fromX, int fromY, int toX, int toY)
+    {
+        Cell from = GetCell(new Vector2Int(fromX, fromY));
+        if (from == null)
+        {
+            return false;
+        }
+
+        var dx = toX - fromX;
+        var dy = toY - fromY;
+
+        // Прямые шаги
+        if (dx == 0 && dy == 1)
+        {
+            return from.CanMove(Directions.North);
+        }
+
+        if (dx == 0 && dy == -1)
+        {
+            return from.CanMove(Directions.South);
+        }
+
+        if (dx == 1 && dy == 0)
+        {
+            return from.CanMove(Directions.East);
+        }
+
+        if (dx == -1 && dy == 0)
+        {
+            return from.CanMove(Directions.West);
+        }
+
+        // Диагональный шаг — проверяем два возможных пути
+        Directions hDir = dx > 0 ? Directions.East : Directions.West;
+        Directions vDir = dy > 0 ? Directions.North : Directions.South;
+
+        Cell horizontal = GetCell(new Vector2Int(toX, fromY));
+        Cell vertical = GetCell(new Vector2Int(fromX, toY));
+
+        // Путь 1: сначала вбок, потом вверх/вниз
+        if (horizontal != null && from.CanMove(hDir) && horizontal.CanMove(vDir))
+        {
+            return true;
+        }
+
+        // Путь 2: сначала вверх/вниз, потом вбок
+        if (vertical != null && from.CanMove(vDir) && vertical.CanMove(hDir))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Возвращает вектор «вправо» относительно направления взгляда.
+    /// Используется для поворота формы обзора.
+    /// </summary>
+    private Vector2Int GetRightVector(Directions facing)
+    {
+        return facing switch
+        {
+            Directions.North => Vector2Int.right,
+            Directions.East => Vector2Int.down,
+            Directions.South => Vector2Int.left,
+            Directions.West => Vector2Int.up,
+            _ => Vector2Int.right,
+        };
     }
 
     /// <summary>

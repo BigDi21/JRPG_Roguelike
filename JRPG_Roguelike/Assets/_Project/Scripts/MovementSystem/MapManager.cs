@@ -231,6 +231,12 @@ public class MapManager : MonoBehaviour
             return;
         }
 
+        // Не создаём тайл для стен — они не видны на миникарте
+        if (cell.Connections == Directions.None)
+        {
+            return;
+        }
+
         GameObject go = Instantiate(_mapTilePrefab, _bigMapContainer);
         MapTile tile = go.GetComponent<MapTile>();
         tile.Initialize(cell, _fogOfWarEnabled);
@@ -248,7 +254,7 @@ public class MapManager : MonoBehaviour
     /// <param name="playerPos">Позиция игрока на сетке.</param>
     /// <param name="facingDir">Направление взгляда игрока.</param>
     /// <param name="range">Радиус обзора для тумана войны.</param>
-    public void UpdateMap(Vector2Int playerPos, Directions facingDir, int range = 3)
+    public void UpdateMap(Vector2Int playerPos, Directions facingDir)
     {
         if (Grid == null)
         {
@@ -257,7 +263,7 @@ public class MapManager : MonoBehaviour
         }
 
         _playerPosition = playerPos;
-        Grid.RevealArea(playerPos, facingDir, range);
+        Grid.RevealArea(playerPos, facingDir);
 
         foreach (Cell cell in Grid.GetAllCells())
         {

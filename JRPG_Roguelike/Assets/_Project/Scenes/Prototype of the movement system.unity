@@ -944,11 +944,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _width
-      value: 50
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _height
-      value: 50
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _cellSize
@@ -956,11 +956,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _algorithm
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _fixedSeed
-      value: 12345
+      value: 617012729
       objectReference: {fileID: 0}
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _cellPrefab
@@ -983,12 +983,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 10136497813677265, guid: a720107d729ae8c4ea576a1971c41e44, type: 3}
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
+      propertyPath: _caIterations
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _finishMarker
       value: 
       objectReference: {fileID: 1628907840296366201, guid: 8c02e04a5da69cd4fbea4d2af08cae28, type: 3}
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _useFixedSeed
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: _bspMaxRoomSize
@@ -1002,6 +1006,10 @@ PrefabInstance:
       propertyPath: _levelGenerator
       value: 
       objectReference: {fileID: 1826505869}
+    - target: {fileID: 4271858666473166008, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
+      propertyPath: _caMinRegionSize
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 5547269393730807899, guid: fe4b3f208b6df2846a5aab7a48601031, type: 3}
       propertyPath: m_LocalPosition.x
       value: 4.46895
